@@ -1,0 +1,81 @@
+import { useRef, useState, useCallback } from 'react';
+import { useMotionValue, useTransform, motion, PanInfo } from 'framer-motion';
+import { useMapStore } from '../store/mapStore';
+
+interface BottomSheetProps {
+  children: React.ReactNode;
+  peekHeight?: number;
+  halfHeight?: number;
+}
+
+const SNAP_POINTS = {
+  peek: 0,
+  half: 1,
+  full: 2,
+};
+
+export default function BottomSheet({ children, peekHeight = 160, halfHeight = 420 }: BottomSheetProps) {
+  const { sheetSnap, setSheetSnap, mode } = useMapStore();
+  const [isDragging, setIsDragging] = useState(false);
+
+  const snapHeights: Record<string, number> = {
+    peek: peekHeight,
+    half: halfHeight,
+    full: window.innerHeight - 80,
+  };
+
+  const currentHeight = snapHeights[sheetSnap];
+
+  const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
+    setIsDragging(false);
+    const velocity = info.velocity.y;
+    const offset = info.offset.y;
+
+    if (velocity < -300 || offset < -80) {
+      // Swipe up
+      if (sheetSnap === 'peek') setSheetSnap('half');
+      else if (sheetSnap === 'half') setSheetSnap('full');
+    } else if (velocity > 300 || offset > 80) {
+      // Swipe down
+      if (sheetSnap === 'full') setSheetSnap('half');
+      else if (sheetSnap === 'half') setSheetSnap('peek');
+    }
+  }, [sheetSnap, setSheetSnap]);
+
+  if (mode === 'navigate' || mode === 'search') return null;
+
+  return (
+    <motion.div
+      drag="y"
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.05}
+      onDragStart={() => setIsDragging(true)}
+      onDragEnd={handleDragEnd}
+      animate={{ height: currentHeight }}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      className="absolute bottom-16 left-0 right-0 bg-white z-20 overflow-hidden"
+      style={{
+        borderRadius: '20px 20px 0 0',
+        boxShadow: '0 -2px 10px rgba(0,0,0,.15)',
+        touchAction: 'none',
+      }}
+    >
+      {/* Drag handle */}
+      <div className="flex justify-center pt-2 pb-1 flex-shrink-0 cursor-grab active:cursor-grabbing">
+        <div className="drag-handle" />
+      </div>
+
+      {/* Content */}
+      <div
+        className="overflow-y-auto"
+        style={{
+          height: currentHeight - 24,
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {children}
+      </div>
+    </motion.div>
+  );
+}
