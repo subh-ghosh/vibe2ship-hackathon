@@ -13,6 +13,26 @@ declare global {
   }
 }
 
+const mapStyle = {
+  version: 8,
+  sources: {
+    'google-maps': {
+      type: 'raster',
+      tiles: [
+        'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=2'
+      ],
+      tileSize: 512,
+    }
+  },
+  layers: [
+    {
+      id: 'google-maps',
+      type: 'raster',
+      source: 'google-maps',
+    }
+  ]
+} as any;
+
 export default function MapView() {
   const {
     center, zoom, selectedPlace,
@@ -125,25 +145,7 @@ export default function MapView() {
     }
   }, [center, zoom]);
 
-  const mapStyle = {
-    version: 8,
-    sources: {
-      'google-maps': {
-        type: 'raster',
-        tiles: [
-          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=2'
-        ],
-        tileSize: 512,
-      }
-    },
-    layers: [
-      {
-        id: 'google-maps',
-        type: 'raster',
-        source: 'google-maps',
-      }
-    ]
-  } as any;
+  // mapStyle moved outside to prevent flickering
 
   const handlePlaceClick = (place: NearbyPlace) => {
     setSelectedPlace({
