@@ -207,11 +207,22 @@ export default function MapView() {
           [Infinity, Infinity, -Infinity, -Infinity]
         );
 
-        // Define bounding box array: [minLng, minLat, maxLng, maxLat]
-        mapRef.current.fitBounds(bounds as [number, number, number, number], {
-          padding: { top: 120, bottom: 450, left: 50, right: 50 },
-          duration: 1000,
-        });
+        const h = window.innerHeight;
+        const w = window.innerWidth;
+        // Wrap in setTimeout to prevent camera collision if routes load instantly from localStorage
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.fitBounds(bounds as [number, number, number, number], {
+              padding: { 
+                top: Math.min(120, h * 0.2), 
+                bottom: Math.min(380, h * 0.4), 
+                left: Math.min(50, w * 0.1), 
+                right: Math.min(50, w * 0.1) 
+              },
+              duration: 1000,
+            });
+          }
+        }, 150);
       }
     }
   }, [routes, mode]);
