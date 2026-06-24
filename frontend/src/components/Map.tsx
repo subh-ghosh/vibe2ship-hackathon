@@ -215,7 +215,7 @@ export default function MapView() {
             key={place.id}
             longitude={place.lng}
             latitude={place.lat}
-            anchor="bottom"
+            anchor="center"
             onClick={() => handlePlaceClick(place)}
           >
             <div
@@ -240,7 +240,7 @@ export default function MapView() {
 
       {/* Selected place marker (when clicking a specific result from autocomplete) */}
       {selectedPlace && mode === 'place' && (
-         <Marker longitude={selectedPlace.lng} latitude={selectedPlace.lat} anchor="bottom">
+         <Marker longitude={selectedPlace.lng} latitude={selectedPlace.lat} anchor="center">
            <div
               title={selectedPlace.name}
               style={{
@@ -261,21 +261,7 @@ export default function MapView() {
       )}
 
 
-      {/* Search this area button */}
-      {showSearchArea && (
-        <div style={{ position: 'absolute', top: 70, left: '50%', transform: 'translateX(-50%)', zIndex: 30 }}>
-          <button
-            onClick={() => {
-              setShowSearchArea(false);
-              userMovedRef.current = false;
-              loadDynamicPlaces(center.lat, center.lng);
-            }}
-            className="flex items-center gap-2 bg-white text-[#0B57D0] font-medium text-[13px] px-4 py-2 rounded-full shadow-md border border-[#DADCE0] active:scale-95 transition-transform"
-          >
-            🔍 Search this area
-          </button>
-        </div>
-      )}
+
     </Map>
   );
 }
