@@ -57,15 +57,24 @@ export default function MapView() {
     return () => { delete window.__mapZoomIn; delete window.__mapZoomOut; };
   }, []);
 
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Load dynamic markers whenever map center changes significantly
-  const loadDynamicPlaces = useCallback(async (lat: number, lng: number) => {
+  const loadDynamicPlaces = useCallback((lat: number, lng: number) => {
     const dist = Math.abs(lat - lastFetchCenter.current.lat) + Math.abs(lng - lastFetchCenter.current.lng);
     if (dist < 0.01) return; // don't refetch for tiny moves
-    lastFetchCenter.current = { lat, lng };
-    setLoadingPlaces(true);
-    const places = await fetchNearbyPlaces(lat, lng, 1500);
-    setDynamicPlaces(places);
-    setLoadingPlaces(false);
+    
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    
+    debounceTimer.current = setTimeout(async () => {
+      if (useMapStore.getState().mode === 'directions' || useMapStore.getState().mode === 'active_nav') return;
+      
+      lastFetchCenter.current = { lat, lng };
+      setLoadingPlaces(true);
+      const places = await fetchNearbyPlaces(lat, lng, 1500);
+      setDynamicPlaces(places);
+      setLoadingPlaces(false);
+    }, 1000); // 1 second debounce
   }, []);
 
   // Initial load
@@ -210,11 +219,15 @@ export default function MapView() {
         bearing: heading || 0,
         duration: 1000
       });
-    } else if (mode === 'directions' && mapRef.current) {
-      // Reset pitch when exiting nav
-      mapRef.current.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
     }
   }, [mode, userLocation, heading]);
+
+  useEffect(() => {
+    if (mode === 'directions' && mapRef.current) {
+      // Reset pitch when entering nav/directions mode
+      mapRef.current.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
+    }
+  }, [mode]);
 
   return (
     <Map

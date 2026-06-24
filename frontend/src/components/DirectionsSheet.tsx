@@ -19,31 +19,34 @@ export default function DirectionsSheet() {
   useEffect(() => {
     if (!selectedPlace || !userLocation) return;
     let active = true;
-    
-    // Fetch ETAs for all tabs concurrently
-    Promise.all([
-      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'driving'),
-      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'two-wheeler'),
-      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'walking')
-    ]).then(([drivingRoute, bikeRoute, walkRoute]) => {
-      if (!active) return;
-      setEtas({
-        driving: drivingRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--',
-        'two-wheeler': bikeRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--',
-        transit: drivingRoute[0] ? drivingRoute[0].duration.replace('min', 'm').replace('hr', 'h') : '--', // Mock transit
-        walking: walkRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--'
-      });
-    });
 
     setLoading(true);
-    fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, transportMode).then(r => {
+    fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'driving').then(r => {
       if (!active) return;
       setRoutes(r);
       setLoading(false);
+      if (r[0] && r[0].durationSeconds) {
+        const drivingSecs = r[0].durationSeconds;
+
+        const formatDur = (sec: number) => {
+          const h = Math.floor(sec / 3600);
+          const m = Math.round((sec % 3600) / 60);
+          if (h > 24) return `${Math.floor(h/24)} d ${h%24} h`;
+          if (h > 0) return `${h} h ${m} m`;
+          return `${m} m`;
+        };
+
+        setEtas({
+          driving: formatDur(drivingSecs),
+          'two-wheeler': formatDur(drivingSecs * 1.1),
+          transit: formatDur(drivingSecs * 1.5),
+          walking: formatDur(drivingSecs * 10)
+        });
+      }
     });
 
     return () => { active = false; };
-  }, [selectedPlace, locKey, transportMode]);
+  }, [selectedPlace?.id, !!userLocation]); // Only refetch on destination change, or when GPS first locks
 
   if (!selectedPlace || mode !== 'directions') return null;
 
