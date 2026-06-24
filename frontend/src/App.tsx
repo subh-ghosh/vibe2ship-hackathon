@@ -6,6 +6,7 @@ import BottomNav from './components/BottomNav';
 import MapControls from './components/MapControls';
 
 import PlaceDetail from './components/PlaceDetail';
+import DirectionsSheet from './components/DirectionsSheet';
 import LocationLoader from './components/LocationLoader';
 import { useMapStore } from './store/mapStore';
 
@@ -59,6 +60,7 @@ export default function App() {
           <SearchBar />
           <BottomSheet>
             <PlaceDetail />
+            <DirectionsSheet />
           </BottomSheet>
           <BottomNav />
         </>

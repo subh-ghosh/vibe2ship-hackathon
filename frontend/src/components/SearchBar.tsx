@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, ArrowLeft, Mic, X, Utensils, Coffee, Bed, Fuel, CreditCard, PlusSquare, ShoppingCart, Sparkles } from 'lucide-react';
+import { Search, ArrowLeft, Mic, X, Utensils, Coffee, Bed, Fuel, CreditCard, PlusSquare, ShoppingCart, Sparkles, MapPin, MoreHorizontal } from 'lucide-react';
 import { useMapStore } from '../store/mapStore';
 import { searchPlaces } from '../services/search';
 import type { SearchSuggestion } from '../types';
@@ -21,7 +21,7 @@ export default function SearchBar() {
   const dragScrollProps = useDraggableScroll<HTMLDivElement>();
   const {
     searchQuery, setSearchQuery, searchFocused, setSearchFocused,
-    mode, setMode, setCenter, setZoom, setSelectedPlace,
+    mode, setMode, setCenter, setZoom, setSelectedPlace, selectedPlace,
     setSheetSnap, userAvatar, center,
   } = useMapStore();
 
@@ -108,6 +108,42 @@ export default function SearchBar() {
     if (mode === 'search') setMode('explore');
   };
 
+
+  if (mode === 'directions') {
+    return (
+      <div className="absolute top-0 left-0 right-0 z-30 pt-3 px-4 pb-4 bg-white shadow-md rounded-b-[24px]">
+        <div className="flex items-start gap-3">
+          <button onClick={() => { setMode('place'); setSheetSnap('half'); }} className="text-[#5F6368] mt-2 flex-shrink-0">
+            <ArrowLeft size={22} />
+          </button>
+          
+          <div className="flex-1 flex flex-col gap-2 relative">
+            <div className="flex items-center gap-2 bg-[#F1F3F4] rounded-[8px] px-3 h-10 border border-transparent focus-within:border-blue-500 focus-within:bg-white">
+              <div className="w-2 h-2 rounded-full bg-[#4285F4]" />
+              <input type="text" value="Your location" readOnly className="flex-1 bg-transparent text-[#202124] text-[15px] outline-none" />
+            </div>
+            
+            <div className="flex items-center gap-2 bg-[#F1F3F4] rounded-[8px] px-3 h-10 border border-transparent focus-within:border-blue-500 focus-within:bg-white">
+              <MapPin size={14} color="#EA4335" className="ml-[-3px]" />
+              <input type="text" value={selectedPlace?.name || ''} readOnly className="flex-1 bg-transparent text-[#202124] text-[15px] outline-none" />
+            </div>
+
+            {/* Vertical connector line */}
+            <div className="absolute left-[15px] top-[26px] bottom-[26px] w-[2px] flex flex-col justify-between">
+              <div className="w-1 h-1 bg-[#DADCE0] rounded-full mx-auto" />
+              <div className="w-1 h-1 bg-[#DADCE0] rounded-full mx-auto" />
+              <div className="w-1 h-1 bg-[#DADCE0] rounded-full mx-auto" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-2">
+            <button className="text-[#5F6368]"><MoreHorizontal size={20} /></button>
+            <button className="text-[#5F6368]"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg></button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

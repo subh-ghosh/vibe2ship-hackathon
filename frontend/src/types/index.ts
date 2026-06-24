@@ -57,7 +57,7 @@ export interface RouteStep {
 
 
 
-export type AppMode = 'explore' | 'search' | 'place';
+export type AppMode = 'explore' | 'search' | 'place' | 'directions';
 export type NavTab = 'explore' | 'go' | 'saved' | 'contribute' | 'updates';
 export type MapType = 'standard' | 'satellite' | 'terrain';
 export type TransportMode = 'driving' | 'walking' | 'transit' | 'cycling' | 'two-wheeler';

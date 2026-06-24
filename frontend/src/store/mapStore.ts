@@ -33,6 +33,14 @@ interface MapStore {
   sheetSnap: 'peek' | 'half' | 'full';
   setSheetSnap: (s: MapStore['sheetSnap']) => void;
 
+  // Routing
+  transportMode: import('../types').TransportMode;
+  setTransportMode: (m: import('../types').TransportMode) => void;
+  routes: import('../types').Route[];
+  setRoutes: (r: import('../types').Route[]) => void;
+  selectedRouteIndex: number;
+  setSelectedRouteIndex: (i: number) => void;
+
   // User
   userAvatar: string;
 }
@@ -64,6 +72,13 @@ export const useMapStore = create<MapStore>()(
 
       sheetSnap: 'peek',
       setSheetSnap: (sheetSnap) => set({ sheetSnap }),
+
+      transportMode: 'driving',
+      setTransportMode: (transportMode) => set({ transportMode }),
+      routes: [],
+      setRoutes: (routes) => set({ routes }),
+      selectedRouteIndex: 0,
+      setSelectedRouteIndex: (selectedRouteIndex) => set({ selectedRouteIndex }),
 
       userAvatar: '/cnlogo-32511.png',
     }),

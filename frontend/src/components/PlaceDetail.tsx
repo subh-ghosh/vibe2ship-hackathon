@@ -100,6 +100,18 @@ export default function PlaceDetail() {
         {/* Action Buttons */}
         <div {...dragScrollProps} className="flex gap-2 mt-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', ...dragScrollProps.style }}>
 
+          <button 
+            onClick={() => {
+              setMode('directions');
+              setSheetSnap('half');
+            }}
+            className="flex items-center gap-2 px-5 py-2 bg-[#0B57D0] text-white rounded-full font-medium text-[13px] flex-shrink-0"
+          >
+            <div className="w-[18px] h-[18px] bg-white rounded-full flex items-center justify-center">
+              <div className="w-[10px] h-[10px] border-[2.5px] border-[#0B57D0] rounded-sm" style={{ transform: 'rotate(45deg)' }} />
+            </div>
+            Directions
+          </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#E8F0FE] text-[#0B57D0] rounded-full font-medium text-[13px] flex-shrink-0">
             <Bookmark size={16} /> Save
           </button>

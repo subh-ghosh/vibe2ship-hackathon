@@ -18,7 +18,7 @@ export default function MapView() {
     center, zoom, selectedPlace,
     userLocation, setUserLocation,
     setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom,
-    mode, searchQuery
+    mode, searchQuery, routes
   } = useMapStore();
 
   const mapRef = useRef<MapRef>(null);
@@ -261,6 +261,49 @@ export default function MapView() {
       )}
 
 
+
+      {/* Route layers */}
+      {mode === 'directions' && routes.map((route, i) => (
+        <Source key={`route-${i}`} id={`route-${i}`} type="geojson" data={{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: route.geometry
+          }
+        }}>
+          <Layer
+            id={`route-line-bg-${i}`}
+            type="line"
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+            paint={{
+              'line-color': '#185ABC', // Darker blue outline
+              'line-width': i === 0 ? 10 : 8,
+              'line-opacity': i === 0 ? 1 : 0.6
+            }}
+          />
+          <Layer
+            id={`route-line-${i}`}
+            type="line"
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+            paint={{
+              'line-color': route.color,
+              'line-width': i === 0 ? 6 : 4,
+              'line-opacity': i === 0 ? 1 : 0.6
+            }}
+          />
+        </Source>
+      ))}
+
+      {/* Target destination pin for directions */}
+      {selectedPlace && mode === 'directions' && (
+         <Marker longitude={selectedPlace.lng} latitude={selectedPlace.lat} anchor="bottom">
+           <svg width="28" height="40" viewBox="0 0 24 34">
+             <path d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 22 12 22s12-14.5 12-22C24 5.373 18.627 0 12 0zm0 17c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z" fill="#EA4335" stroke="white" strokeWidth="1" />
+             <circle cx="12" cy="12" r="5" fill="#751A11" />
+           </svg>
+         </Marker>
+      )}
 
     </Map>
   );
