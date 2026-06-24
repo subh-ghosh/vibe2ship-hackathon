@@ -19,6 +19,14 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export async function searchPlaces(query: string, lat?: number, lng?: number): Promise<SearchSuggestion[]> {
   if (!query || query.trim().length < 2) return [];
 
+  const qLat = lat ? lat.toFixed(1) : '';
+  const qLng = lng ? lng.toFixed(1) : '';
+  const cacheKey = `v2s_search_${query.toLowerCase()}_${qLat}_${qLng}`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
   try {
     const location = lat && lng ? `&location=${lat},${lng}` : '';
     const url = `${OLA_AUTOCOMPLETE}?input=${encodeURIComponent(query)}${location}&api_key=${OLA_API_KEY}`;
@@ -64,6 +72,7 @@ export async function searchPlaces(query: string, lat?: number, lng?: number): P
       });
     }
 
+    try { localStorage.setItem(cacheKey, JSON.stringify(suggestions)); } catch (e) {}
     return suggestions;
   } catch {
     return [];
@@ -78,6 +87,12 @@ export async function resolveArcGISPlace(magicKey: string): Promise<{ lat: numbe
 
 // Reverse geocode using Ola Maps — returns a clean, precise street-level address
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  const cacheKey = `v2s_revgeo_${lat.toFixed(4)}_${lng.toFixed(4)}`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return cached;
+  } catch (e) {}
+
   try {
     const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${OLA_API_KEY}`;
     const res = await fetch(url);
@@ -86,7 +101,9 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
     if (data.results && data.results.length > 0) {
       const addressParts = data.results[0].formatted_address.split(', ');
       // Take first 3 parts to keep it readable and concise, e.g., "Lots Hospital, Chatterjee Lane, Tiretta Bazaar"
-      return addressParts.slice(0, 3).join(', ');
+      const result = addressParts.slice(0, 3).join(', ');
+      try { localStorage.setItem(cacheKey, result); } catch (e) {}
+      return result;
     }
     
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;

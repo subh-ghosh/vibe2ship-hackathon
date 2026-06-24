@@ -63,6 +63,15 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500): Promise<NearbyPlace[]> {
+  const qLat = lat.toFixed(2);
+  const qLng = lng.toFixed(2);
+  const cacheKey = `v2s_overpass_${qLat}_${qLng}_${radius}`;
+  
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
   const query = `
     [out:json][timeout:12];
     (
@@ -82,6 +91,9 @@ export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500)
       body: `data=${encodeURIComponent(query)}`,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
+    
+    if (!res.ok) return []; // Silently handle 429 Too Many Requests
+    
     const json = await res.json();
     const elements: any[] = json.elements || [];
     
@@ -92,7 +104,7 @@ export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500)
       return distA - distB;
     });
 
-    return elements
+    const places = elements
       .filter(e => e.tags?.name && (e.lat || e.center?.lat) && (e.lon || e.center?.lon))
       .slice(0, 30)
       .map((e, i) => ({
@@ -109,6 +121,9 @@ export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500)
         tags: [e.tags.amenity, e.tags.cuisine, e.tags.shop].filter(Boolean),
         photos: [],
       }));
+      
+    try { localStorage.setItem(cacheKey, JSON.stringify(places)); } catch (e) {}
+    return places;
   } catch {
     return [];
   }
@@ -127,13 +142,21 @@ export async function fetchPlaceDetails(lat: number, lng: number): Promise<Parti
 
 // Fetch Wikipedia extract and real image
 export async function fetchWikipediaData(title: string): Promise<{ extract: string | null, image: string | null }> {
+  const cacheKey = `v2s_wiki_${title.toLowerCase()}`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
   try {
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
     const json = await res.json();
-    return {
+    const result = {
       extract: json.extract || null,
       image: json.originalimage?.source || json.thumbnail?.source || null
     };
+    try { localStorage.setItem(cacheKey, JSON.stringify(result)); } catch (e) {}
+    return result;
   } catch { return { extract: null, image: null }; }
 }
 

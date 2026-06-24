@@ -1,6 +1,17 @@
 import type { Route, LatLng, TransportMode } from '../types';
 
 export async function fetchRoute(origin: LatLng, destination: LatLng, mode: TransportMode = 'driving'): Promise<Route[]> {
+  const oLat = origin.lat.toFixed(3);
+  const oLng = origin.lng.toFixed(3);
+  const dLat = destination.lat.toFixed(3);
+  const dLng = destination.lng.toFixed(3);
+  
+  const cacheKey = `v2s_route_${mode}_${oLat},${oLng}_${dLat},${dLng}`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
   try {
     // OSRM mapping
     const profile = mode === 'walking' ? 'foot' : mode === 'two-wheeler' ? 'bike' : 'driving';
@@ -11,7 +22,7 @@ export async function fetchRoute(origin: LatLng, destination: LatLng, mode: Tran
 
     if (!data.routes || data.routes.length === 0) return [];
 
-    return data.routes.map((r: any, i: number) => {
+    const routes = data.routes.map((r: any, i: number) => {
       const distanceKm = (r.distance / 1000).toFixed(1);
       const durationHours = Math.floor(r.duration / 3600);
       const durationMins = Math.round((r.duration % 3600) / 60);
@@ -37,6 +48,9 @@ export async function fetchRoute(origin: LatLng, destination: LatLng, mode: Tran
         trafficLevel: 'light',
       } as Route;
     });
+
+    try { localStorage.setItem(cacheKey, JSON.stringify(routes)); } catch (e) {}
+    return routes;
   } catch (error) {
     console.error('Routing error:', error);
     return [];
