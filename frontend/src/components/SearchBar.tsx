@@ -78,26 +78,15 @@ export default function SearchBar() {
     setSheetSnap('peek');
   };
 
-  const handleChip = async (query: string) => {
-    setLoading(true);
-    const places = await fetchNearbyPlaces(center.lat, center.lng, 2000);
-    const filtered = places.filter(p =>
-      p.category.toLowerCase().includes(query) ||
-      (p.tags || []).some(t => t?.toLowerCase().includes(query))
-    );
-    // Show results in search mode
-    setSearchQuery(query);
+  const handleChip = async (label: string) => {
+    setSearchQuery(label);
     setSearchFocused(true);
     setMode('search');
-    setSuggestions(filtered.map(p => ({
-      id: p.id,
-      label: p.name,
-      sublabel: p.address || p.category,
-      lat: p.lat,
-      lng: p.lng,
-      type: 'place' as const,
-      icon: p.categoryIcon,
-    })));
+    setLoading(true);
+    
+    // Pass the actual search string to the main Nominatim search service
+    const results = await searchPlaces(label, center.lat, center.lng);
+    setSuggestions(results);
     setLoading(false);
   };
 
@@ -216,7 +205,7 @@ export default function SearchBar() {
             {CATEGORY_CHIPS.map(chip => (
               <button
                 key={chip.id}
-                onClick={() => chip.id !== 'ask' && handleChip(chip.query!)}
+                onClick={() => chip.id !== 'ask' && handleChip(chip.label)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border flex-shrink-0 transition-colors shadow-sm ${
                   chip.special
                     ? 'bg-white border-[#D3E3FD] text-[#0B57D0]'
