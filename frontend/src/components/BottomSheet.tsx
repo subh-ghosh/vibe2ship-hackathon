@@ -42,7 +42,7 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
     }
   }, [sheetSnap, setSheetSnap]);
 
-  if (mode !== 'place' && mode !== 'directions') return null;
+  if (mode !== 'place' && mode !== 'directions' && mode !== 'explore') return null;
 
   return (
     <motion.div

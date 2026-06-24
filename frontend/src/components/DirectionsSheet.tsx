@@ -77,7 +77,13 @@ export default function DirectionsSheet() {
 
             {/* Actions */}
             <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-              <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#006064] text-white rounded-full font-medium text-[14px] flex-shrink-0">
+              <button 
+                onClick={() => {
+                  alert('Navigation mode activated!');
+                  setSheetSnap('peek');
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#006064] text-white rounded-full font-medium text-[14px] flex-shrink-0"
+              >
                 <Navigation size={18} /> Start
               </button>
               <button className="flex items-center gap-2 px-4 py-2.5 bg-[#F1F3F4] text-[#001D35] rounded-full font-medium text-[13px] flex-shrink-0">

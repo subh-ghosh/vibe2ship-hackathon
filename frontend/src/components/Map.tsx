@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Map, { Marker, Source, Layer, MapRef, ScaleControl, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMapStore } from '../store/mapStore';
@@ -159,6 +159,21 @@ export default function MapView() {
     setZoom(17);
   };
 
+  const routeSources = useMemo(() => {
+    return routes.map((route, i) => ({
+      id: `route-${i}`,
+      geojsonData: {
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: route.geometry
+        }
+      },
+      color: route.color
+    }));
+  }, [routes]);
+
   return (
     <Map
       ref={mapRef}
@@ -263,17 +278,10 @@ export default function MapView() {
 
 
       {/* Route layers */}
-      {mode === 'directions' && routes.map((route, i) => (
-        <Source key={`route-${i}`} id={`route-${i}`} type="geojson" data={{
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: route.geometry
-          }
-        }}>
+      {mode === 'directions' && routeSources.map((source, i) => (
+        <Source key={source.id} id={source.id} type="geojson" data={source.geojsonData}>
           <Layer
-            id={`route-line-bg-${i}`}
+            id={`${source.id}-bg`}
             type="line"
             layout={{ 'line-join': 'round', 'line-cap': 'round' }}
             paint={{
@@ -283,11 +291,11 @@ export default function MapView() {
             }}
           />
           <Layer
-            id={`route-line-${i}`}
+            id={`${source.id}-line`}
             type="line"
             layout={{ 'line-join': 'round', 'line-cap': 'round' }}
             paint={{
-              'line-color': route.color,
+              'line-color': source.color,
               'line-width': i === 0 ? 6 : 4,
               'line-opacity': i === 0 ? 1 : 0.6
             }}

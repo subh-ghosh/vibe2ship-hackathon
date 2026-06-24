@@ -6,13 +6,13 @@ import BottomNav from './components/BottomNav';
 import MapControls from './components/MapControls';
 
 import PlaceDetail from './components/PlaceDetail';
+import ExploreSheet from './components/ExploreSheet';
 import DirectionsSheet from './components/DirectionsSheet';
 import LocationLoader from './components/LocationLoader';
 import { useMapStore } from './store/mapStore';
 
-
 export default function App() {
-  const { setCenter, setZoom, setUserLocation } = useMapStore();
+  const { setCenter, setZoom, setUserLocation, mode } = useMapStore();
   const [locating, setLocating] = useState(true);
   const [denied, setDenied] = useState(false);
 
@@ -61,6 +61,7 @@ export default function App() {
           <BottomSheet>
             <PlaceDetail />
             <DirectionsSheet />
+            <ExploreSheet />
           </BottomSheet>
           <BottomNav />
         </>
