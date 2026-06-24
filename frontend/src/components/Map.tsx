@@ -87,6 +87,8 @@ export default function MapView() {
 
   // Live location tracking
   useEffect(() => {
+    let lastHeading = 0;
+
     window.__triggerMyLocation = () => {
       // Request iOS 13+ device orientation permission
       if (typeof (window as any).DeviceOrientationEvent !== 'undefined' && typeof (window as any).DeviceOrientationEvent.requestPermission === 'function') {
@@ -122,15 +124,28 @@ export default function MapView() {
       watchIdRef.current = navigator.geolocation.watchPosition(
         (pos) => {
           setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          if (pos.coords.speed !== null) useMapStore.getState().setUserSpeed(pos.coords.speed * 3.6);
+          
+          const speedMpS = pos.coords.speed || 0;
+          if (speedMpS !== null) useMapStore.getState().setUserSpeed(speedMpS * 3.6);
+
+          // If moving faster than ~3.6 km/h, use GPS course instead of erratic compass
+          if (speedMpS > 1 && pos.coords.heading !== null && !Number.isNaN(pos.coords.heading)) {
+            const diff = pos.coords.heading - lastHeading;
+            const normalizedDiff = ((diff + 540) % 360) - 180;
+            // GPS heading is stable, so we apply less smoothing to keep it responsive
+            lastHeading = lastHeading + normalizedDiff * 0.5;
+            setHeading(lastHeading);
+          }
         },
         () => {},
         { enableHighAccuracy: true, maximumAge: 2000 }
       );
     };
 
-    let lastHeading = 0;
     const handleOrientation = (e: DeviceOrientationEvent) => {
+      // Ignore compass if moving (GPS course handled in watchPosition)
+      if (useMapStore.getState().userSpeed > 3.6) return; 
+
       let newHeading = null;
       if ('webkitCompassHeading' in e) {
         newHeading = (e as any).webkitCompassHeading;
@@ -138,12 +153,17 @@ export default function MapView() {
         newHeading = 360 - e.alpha;
       }
       if (newHeading !== null) {
-        // Low-pass filter to prevent jitter
         const diff = newHeading - lastHeading;
-        const normalizedDiff = ((diff + 540) % 360) - 180; // shortest path
-        if (Math.abs(normalizedDiff) > 1) { // Only update if changed by >1 degree
-          lastHeading = lastHeading + normalizedDiff * 0.15; // Smooth by 15%
-          setHeading(lastHeading);
+        const normalizedDiff = ((diff + 540) % 360) - 180;
+        
+        // Ultra-heavy low-pass filter to prevent ANY standing jitter
+        if (Math.abs(normalizedDiff) > 5) { 
+          // Only snap fast if user turns more than 45 degrees
+          const smoothingFactor = Math.abs(normalizedDiff) > 45 ? 0.2 : 0.02;
+          lastHeading = lastHeading + normalizedDiff * smoothingFactor;
+          
+          // Round to nearest integer to stop Mapbox from rendering sub-degree micro-rotations
+          setHeading(Math.round(lastHeading));
         }
       }
     };
