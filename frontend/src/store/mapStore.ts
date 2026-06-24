@@ -12,6 +12,9 @@ interface MapStore {
   mode: AppMode;
   setMode: (m: AppMode) => void;
 
+  exploreCenter: LatLng | null;
+  setExploreCenter: (c: LatLng | null) => void;
+
   // Bottom nav
   activeTab: NavTab;
   setActiveTab: (t: NavTab) => void;
@@ -55,6 +58,9 @@ export const useMapStore = create<MapStore>()(
 
       mode: 'explore',
       setMode: (mode) => set({ mode }),
+
+      exploreCenter: null,
+      setExploreCenter: (exploreCenter) => set({ exploreCenter }),
 
       activeTab: 'explore',
       setActiveTab: (activeTab) => set({ activeTab }),

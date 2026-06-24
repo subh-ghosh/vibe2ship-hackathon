@@ -6,28 +6,31 @@ import { fetchWeather, reverseGeocodeCity, fetchNearbyPlaces, type NearbyPlace, 
 
 export default function ExploreSheet() {
   const dragScrollProps = useDraggableScroll<HTMLDivElement>();
-  const { mode, center, setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom } = useMapStore();
+  const { mode, center, exploreCenter, setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom } = useMapStore();
 
   const [cityName, setCityName] = useState<string>('This area');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [nearbyPlaces, setNearbyPlaces] = useState<NearbyPlace[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialCenter] = useState(center);
 
   useEffect(() => {
     if (mode !== 'explore') return;
     setLoading(true);
 
+    const targetCenter = exploreCenter || initialCenter;
+
     Promise.all([
-      reverseGeocodeCity(center.lat, center.lng),
-      fetchWeather(center.lat, center.lng),
-      fetchNearbyPlaces(center.lat, center.lng, 2000),
+      reverseGeocodeCity(targetCenter.lat, targetCenter.lng),
+      fetchWeather(targetCenter.lat, targetCenter.lng),
+      fetchNearbyPlaces(targetCenter.lat, targetCenter.lng, 2000),
     ]).then(([city, w, places]) => {
       setCityName(city);
       setWeather(w);
       setNearbyPlaces(places.slice(0, 10));
       setLoading(false);
     });
-  }, [center.lat, center.lng, mode]);
+  }, [exploreCenter?.lat, exploreCenter?.lng, initialCenter.lat, initialCenter.lng, mode]);
 
   const handlePlaceClick = (place: NearbyPlace) => {
     setSelectedPlace({

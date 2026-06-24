@@ -38,7 +38,7 @@ export default function MapView() {
     center, zoom, selectedPlace,
     userLocation, setUserLocation,
     setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom,
-    mode, searchQuery, routes
+    mode, searchQuery, routes, setExploreCenter
   } = useMapStore();
 
   const mapRef = useRef<MapRef>(null);
@@ -220,6 +220,12 @@ export default function MapView() {
       attributionControl={false}
       pitchWithRotate={true}
       dragRotate={true}
+      onClick={e => {
+        // Only update explore location if we're in explore mode and clicked on the map background
+        if (mode === 'explore') {
+          setExploreCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+        }
+      }}
     >
       <ScaleControl
         position="bottom-left"
