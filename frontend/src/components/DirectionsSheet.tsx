@@ -7,6 +7,9 @@ export default function DirectionsSheet() {
   const { selectedPlace, userLocation, transportMode, setTransportMode, routes, setRoutes, setMode, setSheetSnap } = useMapStore();
   const [loading, setLoading] = useState(false);
 
+  // Only recalculate route if user moves significantly (~111 meters) to stop map blinking
+  const locKey = userLocation ? `${userLocation.lat.toFixed(3)},${userLocation.lng.toFixed(3)}` : '';
+
   useEffect(() => {
     if (!selectedPlace || !userLocation) return;
     let active = true;
@@ -19,7 +22,7 @@ export default function DirectionsSheet() {
     });
 
     return () => { active = false; };
-  }, [selectedPlace, userLocation, transportMode]);
+  }, [selectedPlace, locKey, transportMode]);
 
   if (!selectedPlace) return null;
 
