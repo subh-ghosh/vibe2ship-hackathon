@@ -94,7 +94,14 @@ export default function SearchBar() {
     setSearchFocused(false);
     setSearchQuery('');
     setSuggestions([]);
-    if (mode === 'search') setMode('explore');
+    if (mode === 'search') {
+      if (selectedPlace) {
+        setMode('place');
+        setSheetSnap('half');
+      } else {
+        setMode('explore');
+      }
+    }
   };
 
 

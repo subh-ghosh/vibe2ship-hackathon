@@ -99,7 +99,7 @@ export default function PlaceDetail() {
           <div className="flex gap-1.5 flex-shrink-0">
             <button className="w-9 h-9 rounded-full bg-[#F1F3F4] flex items-center justify-center"><Bookmark size={18} /></button>
             <button onClick={handleShare} className="w-9 h-9 rounded-full bg-[#F1F3F4] flex items-center justify-center"><Share2 size={18} /></button>
-            <button onClick={() => { setMode('explore'); setSheetSnap('peek'); }} className="w-9 h-9 rounded-full bg-[#F1F3F4] flex items-center justify-center"><X size={18} /></button>
+            <button onClick={() => { setMode('explore'); setSheetSnap('peek'); setSelectedPlace(null); }} className="w-9 h-9 rounded-full bg-[#F1F3F4] flex items-center justify-center"><X size={18} /></button>
           </div>
         </div>
 

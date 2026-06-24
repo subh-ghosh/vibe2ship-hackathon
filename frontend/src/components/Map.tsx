@@ -273,6 +273,8 @@ export default function MapView() {
       pitchWithRotate={true}
       dragRotate={true}
       onClick={e => {
+        if (mode === 'active_nav' || mode === 'directions') return;
+        
         const lat = e.lngLat.lat;
         const lng = e.lngLat.lng;
 
