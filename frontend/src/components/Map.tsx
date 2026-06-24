@@ -200,17 +200,37 @@ export default function MapView() {
     }));
   }, [routes]);
 
+  // Adjust map for active navigation
+  useEffect(() => {
+    if (mode === 'active_nav' && userLocation && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [userLocation.lng, userLocation.lat],
+        zoom: 18,
+        pitch: 60,
+        bearing: heading || 0,
+        duration: 1000
+      });
+    } else if (mode === 'directions' && mapRef.current) {
+      // Reset pitch when exiting nav
+      mapRef.current.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
+    }
+  }, [mode, userLocation, heading]);
+
   return (
     <Map
       ref={mapRef}
       initialViewState={{ longitude: center.lng, latitude: center.lat, zoom }}
       onMoveEnd={e => {
-        const { latitude: lat, longitude: lng, zoom: z } = e.viewState;
-        setCenter({ lat, lng });
-        setZoom(z);
-        if (userMovedRef.current) {
-          setShowSearchArea(true);
-          loadDynamicPlaces(lat, lng);
+        const { latitude: lat, longitude: lng, zoom: z, pitch, bearing } = e.viewState;
+        
+        // Don't override center if in active nav, let it follow user
+        if (mode !== 'active_nav') {
+          setCenter({ lat, lng });
+          setZoom(z);
+          if (userMovedRef.current) {
+            setShowSearchArea(true);
+            loadDynamicPlaces(lat, lng);
+          }
         }
       }}
       onDragStart={() => { userMovedRef.current = true; }}

@@ -9,6 +9,7 @@ import PlaceDetail from './components/PlaceDetail';
 import ExploreSheet from './components/ExploreSheet';
 import DirectionsSheet from './components/DirectionsSheet';
 import LocationLoader from './components/LocationLoader';
+import ActiveNavOverlay from './components/ActiveNavOverlay';
 import { useMapStore } from './store/mapStore';
 
 export default function App() {
@@ -56,14 +57,19 @@ export default function App() {
       {!locating && !denied && (
         <>
           <MapView />
-          <MapControls />
-          <SearchBar />
-          <BottomSheet>
-            <PlaceDetail />
-            <DirectionsSheet />
-            <ExploreSheet />
-          </BottomSheet>
-          <BottomNav />
+          {mode !== 'active_nav' && (
+            <>
+              <MapControls />
+              <SearchBar />
+              <BottomSheet>
+                <PlaceDetail />
+                <DirectionsSheet />
+                <ExploreSheet />
+              </BottomSheet>
+              <BottomNav />
+            </>
+          )}
+          {mode === 'active_nav' && <ActiveNavOverlay />}
         </>
       )}
     </div>
