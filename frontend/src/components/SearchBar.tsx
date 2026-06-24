@@ -75,7 +75,7 @@ export default function SearchBar() {
       tags: [],
     });
     setMode('place');
-    setSheetSnap('peek');
+    setSheetSnap('half');
   };
 
   const handleChip = async (label: string) => {

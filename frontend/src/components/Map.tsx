@@ -377,7 +377,9 @@ export default function MapView() {
 
 
       {/* Route layers */}
-      {mode === 'directions' && routeSources.map((source, i) => (
+      {(mode === 'directions' || mode === 'active_nav') && routeSources.map((source, i) => {
+        if (mode === 'active_nav' && i !== 0) return null; // Hide alternate routes when navigating
+        return (
         <Source key={source.id} id={source.id} type="geojson" data={source.geojsonData}>
           <Layer
             id={`${source.id}-bg`}
@@ -400,10 +402,10 @@ export default function MapView() {
             }}
           />
         </Source>
-      ))}
+      )})}
 
       {/* Target destination pin for directions */}
-      {selectedPlace && mode === 'directions' && (
+      {selectedPlace && (mode === 'directions' || mode === 'active_nav') && (
          <Marker longitude={selectedPlace.lng} latitude={selectedPlace.lat} anchor="bottom">
            <svg width="28" height="40" viewBox="0 0 24 34">
              <path d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 22 12 22s12-14.5 12-22C24 5.373 18.627 0 12 0zm0 17c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z" fill="#EA4335" stroke="white" strokeWidth="1" />
