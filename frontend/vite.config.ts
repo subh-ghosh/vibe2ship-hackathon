@@ -12,16 +12,16 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
+            if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/') || id.includes('/node_modules/scheduler/')) {
               return 'react-vendor';
             }
-            if (id.includes('maplibre-gl') || id.includes('react-map-gl')) {
+            if (id.includes('/node_modules/maplibre-gl/') || id.includes('/node_modules/react-map-gl/')) {
               return 'map-vendor';
             }
-            if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('zustand')) {
+            if (id.includes('/node_modules/framer-motion/') || id.includes('/node_modules/lucide-react/') || id.includes('/node_modules/zustand/')) {
               return 'ui-vendor';
             }
-            return 'vendor'; // all other dependencies
+            return 'vendor';
           }
         }
       }

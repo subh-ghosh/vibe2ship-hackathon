@@ -239,7 +239,7 @@ export default function MapView() {
       })}
 
       {/* Selected place marker (when clicking a specific result from autocomplete) */}
-      {selectedPlace && mode !== 'search' && !searchQuery && (
+      {selectedPlace && mode === 'place' && (
          <Marker longitude={selectedPlace.lng} latitude={selectedPlace.lat} anchor="bottom">
            <div
               title={selectedPlace.name}

@@ -53,6 +53,15 @@ function guessCategory(tags: Record<string, string>): string {
   return a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c;
+}
+
 export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500): Promise<NearbyPlace[]> {
   const query = `
     [out:json][timeout:12];
@@ -75,16 +84,24 @@ export async function fetchNearbyPlaces(lat: number, lng: number, radius = 1500)
     });
     const json = await res.json();
     const elements: any[] = json.elements || [];
+    
+    // Sort by distance
+    elements.sort((a, b) => {
+      const distA = calculateDistance(lat, lng, a.lat || a.center?.lat, a.lon || a.center?.lon);
+      const distB = calculateDistance(lat, lng, b.lat || b.center?.lat, b.lon || b.center?.lon);
+      return distA - distB;
+    });
+
     return elements
-      .filter(e => e.tags?.name && e.lat && e.lon)
+      .filter(e => e.tags?.name && (e.lat || e.center?.lat) && (e.lon || e.center?.lon))
       .slice(0, 30)
       .map((e, i) => ({
         id: `osm-${e.id || i}`,
         name: e.tags.name,
         category: guessCategory(e.tags),
         categoryIcon: guessIcon(e.tags),
-        lat: e.lat,
-        lng: e.lon,
+        lat: e.lat || e.center?.lat,
+        lng: e.lon || e.center?.lon,
         address: [e.tags['addr:street'], e.tags['addr:city']].filter(Boolean).join(', ') || '',
         hours: e.tags.opening_hours,
         phone: e.tags.phone || e.tags['contact:phone'],

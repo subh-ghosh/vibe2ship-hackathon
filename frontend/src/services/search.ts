@@ -4,6 +4,18 @@ import type { SearchSuggestion } from '../types';
 const OLA_API_KEY = '0PkEOtnt9dbWTDNnxmLct8KW1mxPvCy3aJ02wBf9';
 const OLA_AUTOCOMPLETE = 'https://api.olamaps.io/places/v1/autocomplete';
 
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c; // Distance in km
+}
+
 export async function searchPlaces(query: string, lat?: number, lng?: number): Promise<SearchSuggestion[]> {
   if (!query || query.trim().length < 2) return [];
 
@@ -14,7 +26,7 @@ export async function searchPlaces(query: string, lat?: number, lng?: number): P
     const res = await fetch(url);
     const data = await res.json();
 
-    return (data.predictions || []).map((item: any, i: number) => {
+    const suggestions: SearchSuggestion[] = (data.predictions || []).map((item: any, i: number) => {
       // Map Ola types to an icon
       let icon = '📍';
       const types = item.types || [];
@@ -42,6 +54,17 @@ export async function searchPlaces(query: string, lat?: number, lng?: number): P
         icon,
       };
     });
+
+    if (lat && lng) {
+      suggestions.sort((a, b) => {
+        if (!a.lat || !a.lng || !b.lat || !b.lng) return 0;
+        const distA = calculateDistance(lat, lng, a.lat, a.lng);
+        const distB = calculateDistance(lat, lng, b.lat, b.lng);
+        return distA - distB;
+      });
+    }
+
+    return suggestions;
   } catch {
     return [];
   }

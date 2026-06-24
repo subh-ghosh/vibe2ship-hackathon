@@ -6,19 +6,19 @@ const TABS: { id: NavTab; icon: React.ReactNode; activeIcon: React.ReactNode; la
   { 
     id: 'explore', 
     icon: <MapPin size={24} strokeWidth={1.5} />, 
-    activeIcon: <MapPin size={24} fill="currentColor" strokeWidth={1.5} />, 
+    activeIcon: <MapPin size={24} strokeWidth={2.5} color="#001D35" />, 
     label: 'Explore' 
   },
   { 
     id: 'saved', 
     icon: <Bookmark size={24} strokeWidth={1.5} />, 
-    activeIcon: <Bookmark size={24} fill="currentColor" strokeWidth={1.5} />, 
+    activeIcon: <Bookmark size={24} strokeWidth={2.5} color="#001D35" />, 
     label: 'You' 
   },
   { 
     id: 'contribute', 
     icon: <PlusCircle size={24} strokeWidth={1.5} />, 
-    activeIcon: <PlusCircle size={24} fill="currentColor" strokeWidth={1.5} />, 
+    activeIcon: <PlusCircle size={24} strokeWidth={2.5} color="#001D35" />, 
     label: 'Contribute' 
   },
 ];

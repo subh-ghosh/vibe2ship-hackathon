@@ -65,7 +65,7 @@ export const useMapStore = create<MapStore>()(
       sheetSnap: 'peek',
       setSheetSnap: (sheetSnap) => set({ sheetSnap }),
 
-      userAvatar: 'https://ui-avatars.com/api/?name=User&background=1A73E8&color=fff&rounded=true',
+      userAvatar: '/cnlogo-32511.png',
     }),
     {
       name: 'vibe2ship-map-storage',

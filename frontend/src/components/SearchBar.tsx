@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, ArrowLeft, Mic, X } from 'lucide-react';
+import { Search, ArrowLeft, Mic, X, Utensils, Coffee, Bed, Fuel, CreditCard, PlusSquare, ShoppingCart, Sparkles } from 'lucide-react';
 import { useMapStore } from '../store/mapStore';
 import { searchPlaces } from '../services/search';
 import type { SearchSuggestion } from '../types';
@@ -7,14 +7,14 @@ import { useDraggableScroll } from '../hooks/useDraggableScroll';
 import { fetchNearbyPlaces } from '../services/overpass';
 
 const CATEGORY_CHIPS = [
-  { id: 'ask', label: 'Ask Maps', icon: '✨', special: true },
-  { id: 'restaurants', label: 'Restaurants', icon: '🍽️', query: 'restaurant' },
-  { id: 'coffee', label: 'Coffee', icon: '☕', query: 'cafe' },
-  { id: 'hotels', label: 'Hotels', icon: '🏨', query: 'hotel' },
-  { id: 'fuel', label: 'Gas', icon: '⛽', query: 'fuel' },
-  { id: 'atm', label: 'ATMs', icon: '🏧', query: 'atm' },
-  { id: 'hospital', label: 'Hospital', icon: '🏥', query: 'hospital' },
-  { id: 'grocery', label: 'Grocery', icon: '🛒', query: 'supermarket' },
+  { id: 'ask', label: 'Ask Maps', icon: <Sparkles size={16} fill="currentColor" />, special: true },
+  { id: 'restaurants', label: 'Restaurants', icon: <Utensils size={16} />, query: 'restaurant' },
+  { id: 'coffee', label: 'Coffee', icon: <Coffee size={16} />, query: 'cafe' },
+  { id: 'hotels', label: 'Hotels', icon: <Bed size={16} />, query: 'hotel' },
+  { id: 'fuel', label: 'Gas', icon: <Fuel size={16} />, query: 'fuel' },
+  { id: 'atm', label: 'ATMs', icon: <CreditCard size={16} />, query: 'atm' },
+  { id: 'hospital', label: 'Hospital', icon: <PlusSquare size={16} />, query: 'hospital' },
+  { id: 'grocery', label: 'Grocery', icon: <ShoppingCart size={16} />, query: 'supermarket' },
 ];
 
 export default function SearchBar() {
@@ -153,8 +153,8 @@ export default function SearchBar() {
             )}
 
             {!searchFocused && (
-              <button className="flex-shrink-0 ml-1">
-                <img src={userAvatar} alt="Account" className="w-[30px] h-[30px] rounded-full border border-gray-200" />
+              <button className="flex-shrink-0 ml-1 flex items-center justify-center p-1 bg-[#1A1A1A] rounded-[8px]">
+                <img src={userAvatar} alt="Coding Ninjas" className="h-[14px] w-auto object-contain" />
               </button>
             )}
           </div>
@@ -177,7 +177,7 @@ export default function SearchBar() {
                     : 'bg-white border-[#DADCE0] text-[#444746] hover:bg-[#F8F9FA]'
                 }`}
               >
-                <span className="text-sm">{chip.icon}</span>
+                <span className="text-sm flex items-center justify-center">{chip.icon}</span>
                 <span className="text-[13px] font-medium" style={{ fontFamily: 'Google Sans, sans-serif' }}>{chip.label}</span>
               </button>
             ))}
