@@ -23,15 +23,21 @@ export default function PlaceDetail() {
 
   useEffect(() => {
     if (!selectedPlace || mode !== 'place') return;
+    let active = true;
+    
+    setLoadingDetails(true);
     Promise.all([
       fetchPlaceDetails(selectedPlace.lat, selectedPlace.lng),
       fetchWikipediaData(selectedPlace.name),
     ]).then(([d, wiki]) => {
+      if (!active) return;
       setDetails(d);
       setExtract(wiki.extract);
       setWikiImage(wiki.image);
       setLoadingDetails(false);
     });
+    
+    return () => { active = false; };
   }, [selectedPlace?.id, mode]);
 
   if (!selectedPlace || mode !== 'place') return null;

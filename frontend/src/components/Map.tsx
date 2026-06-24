@@ -77,9 +77,12 @@ export default function MapView() {
     }, 1000); // 1 second debounce
   }, []);
 
-  // Initial load
+  // Initial load and unmount cleanup
   useEffect(() => {
     loadDynamicPlaces(center.lat, center.lng);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
   }, []);
 
   // Live location tracking
@@ -216,12 +219,13 @@ export default function MapView() {
   // Adjust map for active navigation
   useEffect(() => {
     if (mode === 'active_nav' && userLocation && mapRef.current) {
-      mapRef.current.flyTo({
+      mapRef.current.easeTo({
         center: [userLocation.lng, userLocation.lat],
         zoom: 18,
         pitch: 60,
         bearing: heading || 0,
-        duration: 1000
+        duration: 800,
+        easing: (t) => t // linear easing to prevent stuttering across rapid updates
       });
     }
   }, [mode, userLocation, heading]);
