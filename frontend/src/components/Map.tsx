@@ -230,13 +230,12 @@ export default function MapView() {
   // Adjust map for active navigation
   useEffect(() => {
     if (mode === 'active_nav' && userLocation && mapRef.current) {
-      mapRef.current.easeTo({
+      mapRef.current.flyTo({
         center: [userLocation.lng, userLocation.lat],
         zoom: 18,
         pitch: 60,
         bearing: heading || 0,
-        duration: 800,
-        easing: (t) => t // linear easing to prevent stuttering across rapid updates
+        duration: 1000
       });
     }
   }, [mode, userLocation, heading]);
