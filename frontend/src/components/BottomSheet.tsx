@@ -50,7 +50,7 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
   return (
     <motion.div
       drag="y"
-      dragConstraints={{ top: 0, bottom: fullHeight - peekHeight }}
+      dragConstraints={{ top: 0, bottom: snapOffsets.peek }}
       dragElastic={0.05}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
