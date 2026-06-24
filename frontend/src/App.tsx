@@ -11,6 +11,7 @@ import DirectionsSheet from './components/DirectionsSheet';
 import LocationLoader from './components/LocationLoader';
 import ActiveNavOverlay from './components/ActiveNavOverlay';
 import { useMapStore } from './store/mapStore';
+import SplashScreen from './components/SplashScreen';
 
 export default function App() {
   const { setCenter, setZoom, setUserLocation, mode } = useMapStore();
@@ -53,6 +54,8 @@ export default function App() {
 
   return (
     <div className="relative w-full h-full bg-[#E8EAED] overflow-hidden select-none">
+      <SplashScreen />
+      
       {/* Ghost loader — shown until location resolves */}
       {(locating || denied) && <LocationLoader denied={denied} />}
 

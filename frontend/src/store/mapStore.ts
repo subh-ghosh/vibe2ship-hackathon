@@ -81,7 +81,7 @@ export const useMapStore = create<MapStore>()(
       userSpeed: null,
       setUserSpeed: (userSpeed) => set({ userSpeed }),
 
-      sheetSnap: 'peek',
+      sheetSnap: 'half',
       setSheetSnap: (sheetSnap) => set({ sheetSnap }),
 
       transportMode: 'driving',

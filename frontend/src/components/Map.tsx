@@ -220,6 +220,8 @@ export default function MapView() {
                 right: Math.min(50, w * 0.1) 
               },
               duration: 1000,
+              pitch: 0,
+              bearing: 0
             });
           }
         }, 150);
