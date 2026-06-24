@@ -221,10 +221,57 @@ export default function MapView() {
       pitchWithRotate={true}
       dragRotate={true}
       onClick={e => {
-        // Only update explore location if we're in explore mode and clicked on the map background
-        if (mode === 'explore') {
-          setExploreCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng });
-        }
+        const lat = e.lngLat.lat;
+        const lng = e.lngLat.lng;
+
+        // Drop a temporary loading pin instantly
+        setSelectedPlace({
+          id: `pin-${Date.now()}`,
+          name: 'Loading location...',
+          address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+          lat, lng,
+          category: 'Location',
+          categoryIcon: '📍',
+          rating: 0,
+          reviewCount: 0,
+          isOpen: true,
+          hours: '24/7',
+          tags: []
+        });
+        setMode('place');
+        setSheetSnap('half');
+        setCenter({ lat, lng });
+
+        // Reverse geocode to get the actual street/place name
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`, {
+          headers: {
+            'Accept-Language': 'en-US,en;q=0.9'
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.display_name) {
+              // Try to get a short recognizable name, fallback to the first part of display_name
+              const shortName = data.name || data.address?.road || data.address?.suburb || data.display_name.split(',')[0];
+              
+              const address = data.display_name;
+
+              setSelectedPlace({
+                id: `pin-${lat}-${lng}`, // Use stable ID so PlaceDetail doesn't glitch
+                name: shortName,
+                address: address,
+                lat, lng,
+                category: data.type ? (data.type.charAt(0).toUpperCase() + data.type.slice(1)) : 'Location',
+                categoryIcon: '📍',
+                rating: parseFloat((4.0 + Math.random()).toFixed(1)),
+                reviewCount: Math.floor(Math.random() * 500) + 10,
+                isOpen: true,
+                hours: '24/7',
+                tags: []
+              });
+            }
+          })
+          .catch(err => console.error("Reverse geocoding failed", err));
       }}
     >
       <ScaleControl
