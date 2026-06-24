@@ -36,7 +36,7 @@ export default function BottomNav() {
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-30 bg-white flex items-center justify-around"
+      className="absolute bottom-0 left-0 right-0 z-50 bg-white flex items-center justify-around"
       style={{
         height: '80px',
         boxShadow: '0 -1px 0 rgba(0,0,0,.05)',

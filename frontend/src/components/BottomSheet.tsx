@@ -19,10 +19,11 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
   const [isDragging, setIsDragging] = useState(false);
 
   const fullHeight = window.innerHeight - 80;
+  const bottomNavHeight = mode === 'explore' ? 80 : 0;
 
   const snapOffsets: Record<string, number> = {
-    peek: fullHeight - peekHeight,
-    half: fullHeight - halfHeight,
+    peek: fullHeight - peekHeight - bottomNavHeight,
+    half: fullHeight - halfHeight - bottomNavHeight,
     full: 0,
   };
 
@@ -80,6 +81,7 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
         className="overflow-y-auto"
         style={{
           height: fullHeight - 24,
+          paddingBottom: mode === 'explore' ? '80px' : '0px',
           overscrollBehavior: 'contain',
           WebkitOverflowScrolling: 'touch',
         }}
