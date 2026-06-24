@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: civicos-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/civicos
+    username: civicos
+    password: civicos_secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  security:
+    enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+civicos:
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000
+  gemini:
+    api-key: ${GEMINI_API_KEY:AQ.Ab8RN6IY59MO7ZY6eTSSIY3TW3N9LzGyvMx7H4itF6ol_OOUFw}
+    model: gemini-2.5-flash
+  ors:
+    api-key: ${ORS_API_KEY:eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImZjMzZjNjUwODk3NjQ3OTNiMjFlNmFiZmYzMzJkOWI3IiwiaCI6Im11cm11cjY0In0=}
+
+logging:
+  level:
+    com.civicos: DEBUG
+    org.springframework.security: WARN
