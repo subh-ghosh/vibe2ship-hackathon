@@ -32,6 +32,8 @@ export default function App() {
         const accuracy = pos.coords.accuracy;
 
         setUserLocation({ lat, lng });
+        if (pos.coords.speed !== null) useMapStore.getState().setUserSpeed(pos.coords.speed * 3.6);
+        
         setCenter({ lat, lng });
         // If accuracy is bad, zoom out more so user can see context
         setZoom(accuracy > 5000 ? 11 : 16);

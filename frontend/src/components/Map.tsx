@@ -93,6 +93,7 @@ export default function MapView() {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           setUserLocation({ lat, lng });
+          if (pos.coords.speed !== null) useMapStore.getState().setUserSpeed(pos.coords.speed * 3.6);
           mapRef.current?.flyTo({ center: [lng, lat], zoom: 16, duration: 800 });
           loadDynamicPlaces(lat, lng);
         },
@@ -105,7 +106,10 @@ export default function MapView() {
       );
 
       watchIdRef.current = navigator.geolocation.watchPosition(
-        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (pos) => {
+          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          if (pos.coords.speed !== null) useMapStore.getState().setUserSpeed(pos.coords.speed * 3.6);
+        },
         () => {},
         { enableHighAccuracy: true, maximumAge: 2000 }
       );

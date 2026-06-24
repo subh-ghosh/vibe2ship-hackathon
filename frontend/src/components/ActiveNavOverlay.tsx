@@ -2,11 +2,12 @@ import { X, Navigation, Search, BellOff, AlertTriangle } from 'lucide-react';
 import { useMapStore } from '../store/mapStore';
 
 export default function ActiveNavOverlay() {
-  const { setMode, setSheetSnap, routes, transportMode } = useMapStore();
+  const { setMode, setSheetSnap, routes, transportMode, userSpeed } = useMapStore();
 
   const activeRoute = routes[0];
   const distance = activeRoute?.distance || '---';
   const duration = activeRoute?.duration || '---';
+  const via = activeRoute?.via || 'the route';
 
   const handleExit = () => {
     setMode('directions');
@@ -21,22 +22,18 @@ export default function ActiveNavOverlay() {
           <div className="p-4 pb-3 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Navigation size={32} className="text-white fill-white" />
-              <div className="text-[26px] font-medium leading-none" style={{ fontFamily: 'Google Sans, sans-serif' }}>
-                Head northwest
+              <div className="text-[24px] font-medium leading-tight" style={{ fontFamily: 'Google Sans, sans-serif' }}>
+                Proceed on {via}
               </div>
             </div>
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 ml-2">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#1A73E8">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
               </svg>
             </div>
           </div>
           <div className="bg-[#004D40] px-4 py-2 flex items-center gap-2 rounded-br-2xl w-max">
-            <span className="text-[16px] font-medium">Then</span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 14l-4-4 4-4" />
-              <path d="M5 10h11a4 4 0 0 1 0 8h-1" />
-            </svg>
+            <span className="text-[16px] font-medium">Follow route guidance</span>
           </div>
         </div>
       </div>
@@ -46,7 +43,7 @@ export default function ActiveNavOverlay() {
         
         {/* Speedometer */}
         <div className="w-16 h-16 bg-white rounded-full shadow-lg flex flex-col items-center justify-center border-4 border-gray-100 pointer-events-auto">
-          <span className="text-[22px] font-bold leading-none text-[#202124]">0</span>
+          <span className="text-[22px] font-bold leading-none text-[#202124]">{Math.round(userSpeed || 0)}</span>
           <span className="text-[10px] font-medium text-[#5F6368] mt-0.5">km/h</span>
         </div>
 

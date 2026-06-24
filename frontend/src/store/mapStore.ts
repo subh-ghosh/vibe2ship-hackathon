@@ -31,6 +31,8 @@ interface MapStore {
 
   userLocation: LatLng | null;
   setUserLocation: (l: LatLng | null) => void;
+  userSpeed: number | null;
+  setUserSpeed: (s: number | null) => void;
 
   // Bottom sheet
   sheetSnap: 'peek' | 'half' | 'full';
@@ -75,6 +77,9 @@ export const useMapStore = create<MapStore>()(
 
       userLocation: null,
       setUserLocation: (userLocation) => set({ userLocation }),
+
+      userSpeed: null,
+      setUserSpeed: (userSpeed) => set({ userSpeed }),
 
       sheetSnap: 'peek',
       setSheetSnap: (sheetSnap) => set({ sheetSnap }),
