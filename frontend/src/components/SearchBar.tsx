@@ -3,96 +3,133 @@ import { Search, ArrowLeft, Mic, X } from 'lucide-react';
 import { useMapStore } from '../store/mapStore';
 import { searchPlaces } from '../services/search';
 import type { SearchSuggestion } from '../types';
-import { RECENT_SEARCHES, PLACES } from '../data/places';
+import { useDraggableScroll } from '../hooks/useDraggableScroll';
+import { fetchNearbyPlaces } from '../services/overpass';
+
+const CATEGORY_CHIPS = [
+  { id: 'ask', label: 'Ask Maps', icon: '✨', special: true },
+  { id: 'restaurants', label: 'Restaurants', icon: '🍽️', query: 'restaurant' },
+  { id: 'coffee', label: 'Coffee', icon: '☕', query: 'cafe' },
+  { id: 'hotels', label: 'Hotels', icon: '🏨', query: 'hotel' },
+  { id: 'fuel', label: 'Gas', icon: '⛽', query: 'fuel' },
+  { id: 'atm', label: 'ATMs', icon: '🏧', query: 'atm' },
+  { id: 'hospital', label: 'Hospital', icon: '🏥', query: 'hospital' },
+  { id: 'grocery', label: 'Grocery', icon: '🛒', query: 'supermarket' },
+];
 
 export default function SearchBar() {
+  const dragScrollProps = useDraggableScroll<HTMLDivElement>();
   const {
     searchQuery, setSearchQuery, searchFocused, setSearchFocused,
     mode, setMode, setCenter, setZoom, setSelectedPlace,
-    setSheetSnap, userAvatar,
+    setSheetSnap, userAvatar, center,
   } = useMapStore();
 
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>(RECENT_SEARCHES);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (searchFocused && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (searchFocused && inputRef.current) inputRef.current.focus();
   }, [searchFocused]);
 
   const handleInput = useCallback(async (val: string) => {
     setSearchQuery(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!val.trim()) { setSuggestions([]); return; }
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const results = await searchPlaces(val);
+      const results = await searchPlaces(val, center.lat, center.lng);
       setSuggestions(results);
       setLoading(false);
     }, 300);
-  }, [setSearchQuery]);
+  }, [setSearchQuery, center]);
 
-  const handleSelect = (s: SearchSuggestion) => {
+  const handleSelect = async (s: SearchSuggestion) => {
+    let lat = s.lat;
+    let lng = s.lng;
+    
+    // Fallback just in case, but Ola should provide these immediately
+    if (lat === undefined || lng === undefined) {
+      lat = center.lat;
+      lng = center.lng;
+    }
+
     setSearchQuery(s.label);
     setSearchFocused(false);
-    setCenter({ lat: s.lat, lng: s.lng });
+    setCenter({ lat, lng });
     setZoom(16);
-    // Find matching place
-    const place = PLACES.find((p) => p.id === s.id);
-    if (place) {
-      setSelectedPlace(place);
-      setMode('place');
-      setSheetSnap('half');
-    } else {
-      setMode('explore');
-      setSheetSnap('peek');
-    }
+    setSelectedPlace({
+      id: s.id,
+      name: s.label,
+      address: s.sublabel,
+      lat,
+      lng,
+      category: s.type === 'place' ? 'Location' : 'Search Result',
+      categoryIcon: s.icon || '📍',
+      rating: 0,
+      reviewCount: 0,
+      isOpen: false,
+      hours: '',
+      tags: [],
+    });
+    setMode('place');
+    setSheetSnap('half');
+  };
+
+  const handleChip = async (query: string) => {
+    setLoading(true);
+    const places = await fetchNearbyPlaces(center.lat, center.lng, 2000);
+    const filtered = places.filter(p =>
+      p.category.toLowerCase().includes(query) ||
+      (p.tags || []).some(t => t?.toLowerCase().includes(query))
+    );
+    // Show results in search mode
+    setSearchQuery(query);
+    setSearchFocused(true);
+    setMode('search');
+    setSuggestions(filtered.map(p => ({
+      id: p.id,
+      label: p.name,
+      sublabel: p.address || p.category,
+      lat: p.lat,
+      lng: p.lng,
+      type: 'place' as const,
+      icon: p.categoryIcon,
+    })));
+    setLoading(false);
   };
 
   const handleBack = () => {
     setSearchFocused(false);
     setSearchQuery('');
-    setSuggestions(RECENT_SEARCHES);
+    setSuggestions([]);
     if (mode === 'search') setMode('explore');
   };
 
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSuggestions(RECENT_SEARCHES);
-    inputRef.current?.focus();
-  };
-
-  if (mode === 'navigate') return null;
 
   return (
     <>
-      {/* Search bar and Chips container */}
-      <div
-        className="absolute top-0 left-0 right-0 z-30 pt-3 pb-2 flex flex-col gap-2"
-        style={{ pointerEvents: 'none' }}
-      >
+      {/* Search bar + Chips */}
+      <div className="absolute top-0 left-0 right-0 z-30 pt-3 pb-2 flex flex-col gap-2" style={{ pointerEvents: 'none' }}>
         <div className="px-4">
           <div
             className="flex items-center gap-3 bg-white rounded-[24px] px-3.5"
-            style={{
-              height: '48px',
-              boxShadow: '0 1px 3px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.1)',
-              pointerEvents: 'all',
-            }}
+            style={{ height: '48px', boxShadow: '0 1px 3px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.1)', pointerEvents: 'all' }}
           >
-            {searchFocused || mode === 'directions' ? (
+            {searchFocused ? (
               <button onClick={handleBack} className="text-[#5F6368] flex-shrink-0">
                 <ArrowLeft size={22} />
               </button>
             ) : (
-              <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#EA4335" />
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10" fill="#4285F4" />
-                  <path d="M12 2C6.48 2 2 6.48 2 12" fill="#FBBC05" />
-                </svg>
+              <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full overflow-hidden">
+                <img 
+                  src="https://maps.gstatic.com/mapfiles/maps_lite/pwa/icons/maps15_bnuw3a_round_192x192.png" 
+                  alt="Google Maps" 
+                  width="24" 
+                  height="24" 
+                />
               </div>
             )}
 
@@ -108,79 +145,71 @@ export default function SearchBar() {
             />
 
             {searchQuery ? (
-              <button onClick={clearSearch} className="text-[#5F6368] flex-shrink-0 p-1">
+              <button onClick={() => { setSearchQuery(''); setSuggestions([]); inputRef.current?.focus(); }} className="text-[#5F6368] flex-shrink-0 p-1">
                 <X size={20} />
               </button>
             ) : (
-              <button className="text-[#5F6368] flex-shrink-0 p-1">
-                <Mic size={20} />
-              </button>
+              <button className="text-[#5F6368] flex-shrink-0 p-1"><Mic size={20} /></button>
             )}
 
             {!searchFocused && (
               <button className="flex-shrink-0 ml-1">
-                <img
-                  src={userAvatar}
-                  alt="Account"
-                  className="w-[30px] h-[30px] rounded-full border border-gray-200"
-                />
+                <img src={userAvatar} alt="Account" className="w-[30px] h-[30px] rounded-full border border-gray-200" />
               </button>
             )}
           </div>
         </div>
 
-        {/* Filter Chips - Only show when not searching */}
-        {!searchFocused && mode !== 'directions' && (
-          <div 
-            className="flex gap-2 overflow-x-auto px-4 pb-1" 
-            style={{ scrollbarWidth: 'none', pointerEvents: 'all' }}
+        {/* Category chips */}
+        {!searchFocused && (
+          <div
+            {...dragScrollProps}
+            className="flex gap-2 overflow-x-auto px-4 pb-1"
+            style={{ scrollbarWidth: 'none', pointerEvents: 'all', ...dragScrollProps.style }}
           >
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#D3E3FD] flex-shrink-0 transition-colors">
-              <span className="text-[#0B57D0] text-sm">✨</span>
-              <span className="text-[13px] font-medium text-[#0B57D0]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Ask Maps</span>
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#DADCE0] flex-shrink-0 hover:bg-[#F8F9FA] transition-colors shadow-sm">
-              <span className="text-[#444746] text-sm">💼</span>
-              <span className="text-[13px] font-medium text-[#444746]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Work</span>
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#DADCE0] flex-shrink-0 hover:bg-[#F8F9FA] transition-colors shadow-sm">
-              <span className="text-[#444746] text-sm">🍴</span>
-              <span className="text-[13px] font-medium text-[#444746]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Restaurants</span>
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#DADCE0] flex-shrink-0 hover:bg-[#F8F9FA] transition-colors shadow-sm">
-              <span className="text-[#444746] text-sm">🏨</span>
-              <span className="text-[13px] font-medium text-[#444746]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Hotels</span>
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#DADCE0] flex-shrink-0 hover:bg-[#F8F9FA] transition-colors shadow-sm">
-              <span className="text-[#444746] text-sm">⛽</span>
-              <span className="text-[13px] font-medium text-[#444746]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Gas</span>
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-[#DADCE0] flex-shrink-0 hover:bg-[#F8F9FA] transition-colors shadow-sm">
-              <span className="text-[#444746] text-sm">🛒</span>
-              <span className="text-[13px] font-medium text-[#444746]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Groceries</span>
-            </button>
+            {CATEGORY_CHIPS.map(chip => (
+              <button
+                key={chip.id}
+                onClick={() => chip.id !== 'ask' && handleChip(chip.query!)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border flex-shrink-0 transition-colors shadow-sm ${
+                  chip.special
+                    ? 'bg-white border-[#D3E3FD] text-[#0B57D0]'
+                    : 'bg-white border-[#DADCE0] text-[#444746] hover:bg-[#F8F9FA]'
+                }`}
+              >
+                <span className="text-sm">{chip.icon}</span>
+                <span className="text-[13px] font-medium" style={{ fontFamily: 'Google Sans, sans-serif' }}>{chip.label}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Search suggestions dropdown */}
+      {/* Suggestions dropdown */}
       {searchFocused && (
         <div
           className="absolute top-[68px] left-4 right-4 z-30 bg-white rounded-2xl overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,.25)', pointerEvents: 'all' }}
         >
-          {/* Divider */}
           <div className="h-px bg-[#DADCE0] mx-4" />
 
           {loading && (
             <div className="flex gap-2 px-4 py-3 items-center">
-              {[0, 1, 2].map(i => (
-                <div key={i} className="w-2 h-2 rounded-full bg-[#DADCE0] animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />
+              {[0,1,2].map(i => (
+                <div key={i} className="w-2 h-2 rounded-full bg-[#DADCE0] animate-bounce" style={{ animationDelay: `${i*0.1}s` }} />
               ))}
             </div>
           )}
 
-          {!loading && suggestions.map((s, idx) => (
+          {!loading && suggestions.length === 0 && searchQuery.length > 1 && (
+            <div className="px-4 py-6 text-center text-[#5F6368] text-sm">No results found</div>
+          )}
+
+          {!loading && suggestions.length === 0 && searchQuery.length <= 1 && (
+            <div className="px-4 py-6 text-center text-[#5F6368] text-sm">Start typing to search anywhere…</div>
+          )}
+
+          {!loading && suggestions.map((s) => (
             <button
               key={s.id}
               onClick={() => handleSelect(s)}
@@ -197,17 +226,8 @@ export default function SearchBar() {
                 <div className="text-[14px] font-medium text-[#202124] truncate">{s.label}</div>
                 <div className="text-[12px] text-[#5F6368] truncate">{s.sublabel}</div>
               </div>
-              {s.type === 'recent' && (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#5F6368" style={{ transform: 'rotate(225deg)', flexShrink: 0 }}>
-                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-                </svg>
-              )}
             </button>
           ))}
-
-          {!loading && suggestions.length === 0 && (
-            <div className="px-4 py-6 text-center text-[#5F6368] text-sm">No results found</div>
-          )}
         </div>
       )}
     </>

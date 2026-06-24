@@ -1,49 +1,69 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import MapView from './components/Map';
 import SearchBar from './components/SearchBar';
 import BottomSheet from './components/BottomSheet';
 import BottomNav from './components/BottomNav';
 import MapControls from './components/MapControls';
-import LayerPicker from './components/LayerPicker';
 import ExploreSheet from './components/ExploreSheet';
 import PlaceDetail from './components/PlaceDetail';
-import DirectionsPanel from './components/DirectionsPanel';
-import NavigationMode from './components/NavigationMode';
+import LocationLoader from './components/LocationLoader';
 import { useMapStore } from './store/mapStore';
-import { CIVIC_ISSUES } from './data/places';
+
 
 export default function App() {
-  const { setCivicIssues } = useMapStore();
+  const { setCenter, setZoom, setUserLocation } = useMapStore();
+  const [locating, setLocating] = useState(true);
+  const [denied, setDenied] = useState(false);
 
   useEffect(() => {
-    // Load initial civic issues
-    setCivicIssues(CIVIC_ISSUES);
-  }, [setCivicIssues]);
+
+    if (!('geolocation' in navigator)) {
+      // No geolocation support — just show map at default
+      setLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy;
+
+        setUserLocation({ lat, lng });
+        setCenter({ lat, lng });
+        // If accuracy is bad, zoom out more so user can see context
+        setZoom(accuracy > 5000 ? 11 : 16);
+        setLocating(false);
+      },
+      (err) => {
+        if (err.code === 1) {
+          setDenied(true);
+        } else {
+          // Timeout or unavailable — just open at default
+          setLocating(false);
+        }
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
+  }, []);
 
   return (
     <div className="relative w-full h-full bg-[#E8EAED] overflow-hidden select-none">
-      {/* Map layer (bottom-most) */}
-      <MapView />
+      {/* Ghost loader — shown until location resolves */}
+      {(locating || denied) && <LocationLoader denied={denied} />}
 
-      {/* Floating controls */}
-      <MapControls />
-
-      {/* UI Overlays */}
-      <SearchBar />
-      
-      {/* Full screen panels */}
-      <DirectionsPanel />
-      <NavigationMode />
-      <LayerPicker />
-
-      {/* Bottom Sheet for Explore/Place details */}
-      <BottomSheet>
-        <ExploreSheet />
-        <PlaceDetail />
-      </BottomSheet>
-
-      {/* Bottom Navigation */}
-      <BottomNav />
+      {!locating && !denied && (
+        <>
+          <MapView />
+          <MapControls />
+          <SearchBar />
+          <BottomSheet>
+            <ExploreSheet />
+            <PlaceDetail />
+          </BottomSheet>
+          <BottomNav />
+        </>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@
     background: #121212;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -215,26 +216,43 @@
 
 .gm-fab:active, .gm-fab-small:active { transform: scale(0.95); }
 
-/* CivicOS civic layer badges */
-.civic-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #EA4335;
-  border: 2px solid white;
-  font-size: 8px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
 /* Star rating */
 .star-rating span { color: #F29900; }
 
 /* Transition */
 .transition-transform { transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* MapLibre Native Control Overrides for Google Maps FAB style */
+.maplibregl-ctrl-bottom-right {
+  bottom: 160px !important;
+  right: 12px !important;
+}
+
+.maplibregl-ctrl-group {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.maplibregl-ctrl-geolocate {
+  width: 44px !important;
+  height: 44px !important;
+  background-color: white !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 -1px 0px rgba(0,0,0,.02) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 8px !important;
+}
+
+/* Recolor the MapLibre crosshair icon to #5F6368 */
+.maplibregl-ctrl-geolocate .maplibregl-ctrl-icon {
+  filter: invert(40%) sepia(8%) saturate(301%) hue-rotate(185deg) brightness(91%) contrast(85%);
+}
+
+/* Recolor to blue #1A73E8 when active tracking */
+.maplibregl-ctrl-geolocate-active .maplibregl-ctrl-icon,
+.maplibregl-ctrl-geolocate-background .maplibregl-ctrl-icon {
+  filter: invert(29%) sepia(97%) saturate(2250%) hue-rotate(204deg) brightness(96%) contrast(98%);
+}

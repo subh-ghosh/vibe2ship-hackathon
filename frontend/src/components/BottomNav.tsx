@@ -26,7 +26,7 @@ const TABS: { id: NavTab; icon: React.ReactNode; activeIcon: React.ReactNode; la
 export default function BottomNav() {
   const { activeTab, setActiveTab, mode, setMode, setSheetSnap } = useMapStore();
 
-  if (mode === 'navigate' || mode === 'directions' || mode === 'search') return null;
+  if (mode === 'search') return null;
 
   const handleTab = (tab: NavTab) => {
     setActiveTab(tab);

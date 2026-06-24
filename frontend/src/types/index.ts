@@ -22,7 +22,6 @@ export interface Place {
   distance?: string;
   duration?: string;
   tags?: string[];
-  civicScore?: number;
 }
 
 export interface SearchSuggestion {
@@ -33,6 +32,7 @@ export interface SearchSuggestion {
   lng: number;
   type: 'place' | 'address' | 'route' | 'recent';
   icon: string;
+  magicKey?: string;
 }
 
 export interface Route {
@@ -45,7 +45,6 @@ export interface Route {
   via: string;
   color: string;
   trafficLevel: 'light' | 'moderate' | 'heavy';
-  civicScore?: number;
 }
 
 export interface RouteStep {
@@ -56,18 +55,9 @@ export interface RouteStep {
   streetName: string;
 }
 
-export interface CivicIssue {
-  id: string;
-  type: 'pothole' | 'garbage' | 'water_leakage' | 'streetlight' | 'flooding' | 'road_damage' | 'construction' | 'manhole';
-  lat: number;
-  lng: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  title: string;
-  reportedAt: Date;
-  verifications: number;
-}
 
-export type AppMode = 'explore' | 'search' | 'place' | 'directions' | 'navigate' | 'layers';
+
+export type AppMode = 'explore' | 'search' | 'place';
 export type NavTab = 'explore' | 'go' | 'saved' | 'contribute' | 'updates';
 export type MapType = 'standard' | 'satellite' | 'terrain';
 export type TransportMode = 'driving' | 'walking' | 'transit' | 'cycling' | 'two-wheeler';

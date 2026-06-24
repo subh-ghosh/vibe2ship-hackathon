@@ -42,7 +42,7 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
     }
   }, [sheetSnap, setSheetSnap]);
 
-  if (mode === 'navigate' || mode === 'search') return null;
+  if (mode === 'search') return null;
 
   return (
     <motion.div
@@ -53,16 +53,22 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
       onDragEnd={handleDragEnd}
       animate={{ height: currentHeight }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="absolute bottom-16 left-0 right-0 bg-white z-20 overflow-hidden"
+      className="absolute bottom-[80px] left-0 right-0 bg-white z-40 overflow-hidden"
       style={{
         borderRadius: '20px 20px 0 0',
-        boxShadow: '0 -2px 10px rgba(0,0,0,.15)',
-        touchAction: 'none',
+        boxShadow: '0 -2px 20px rgba(0,0,0,.25)',
       }}
     >
-      {/* Drag handle */}
-      <div className="flex justify-center pt-2 pb-1 flex-shrink-0 cursor-grab active:cursor-grabbing">
-        <div className="drag-handle" />
+      {/* Expanded Drag handle area for easier grabbing */}
+      <div 
+        className="flex justify-center pt-3 pb-4 flex-shrink-0 cursor-grab active:cursor-grabbing w-full"
+        onClick={() => {
+          if (sheetSnap === 'peek') setSheetSnap('half');
+          else if (sheetSnap === 'half') setSheetSnap('full');
+          else if (sheetSnap === 'full') setSheetSnap('half');
+        }}
+      >
+        <div className="drag-handle !mt-0 !w-12 !h-[5px]" />
       </div>
 
       {/* Content */}

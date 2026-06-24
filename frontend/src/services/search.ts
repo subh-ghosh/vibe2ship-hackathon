@@ -1,57 +1,72 @@
 import type { SearchSuggestion } from '../types';
-import { PLACES, RECENT_SEARCHES } from '../data/places';
 
-export async function searchPlaces(query: string): Promise<SearchSuggestion[]> {
-  if (!query.trim()) return RECENT_SEARCHES.map(r => ({ ...r, type: 'recent' as const }));
+// Ola Maps API Key for Vibe2Ship Hackathon
+const OLA_API_KEY = '0PkEOtnt9dbWTDNnxmLct8KW1mxPvCy3aJ02wBf9';
+const OLA_AUTOCOMPLETE = 'https://api.olamaps.io/places/v1/autocomplete';
 
-  // Local match first
-  const localMatches = PLACES.filter(p =>
-    p.name.toLowerCase().includes(query.toLowerCase()) ||
-    p.address.toLowerCase().includes(query.toLowerCase()) ||
-    p.category.toLowerCase().includes(query.toLowerCase())
-  ).map(p => ({
-    id: p.id,
-    label: p.name,
-    sublabel: p.address,
-    lat: p.lat,
-    lng: p.lng,
-    type: 'place' as const,
-    icon: p.categoryIcon,
-  }));
+export async function searchPlaces(query: string, lat?: number, lng?: number): Promise<SearchSuggestion[]> {
+  if (!query || query.trim().length < 2) return [];
 
-  if (localMatches.length >= 3) return localMatches.slice(0, 6);
-
-  // Fallback to Nominatim
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ' Bengaluru')}&format=json&limit=5&addressdetails=1`,
-      { headers: { 'User-Agent': 'CivicOS/1.0' } }
-    );
+    const location = lat && lng ? `&location=${lat},${lng}` : '';
+    const url = `${OLA_AUTOCOMPLETE}?input=${encodeURIComponent(query)}${location}&api_key=${OLA_API_KEY}`;
+    
+    const res = await fetch(url);
     const data = await res.json();
-    const nominatimResults: SearchSuggestion[] = data.map((item: Record<string, unknown>, i: number) => ({
-      id: `nom-${i}`,
-      label: (item.name as string) || (item.display_name as string).split(',')[0],
-      sublabel: (item.display_name as string).split(',').slice(1, 3).join(',').trim(),
-      lat: parseFloat(item.lat as string),
-      lng: parseFloat(item.lon as string),
-      type: 'address' as const,
-      icon: '📍',
-    }));
-    return [...localMatches, ...nominatimResults].slice(0, 6);
+
+    return (data.predictions || []).map((item: any, i: number) => {
+      // Map Ola types to an icon
+      let icon = '📍';
+      const types = item.types || [];
+      if (types.includes('restaurant') || types.includes('food') || types.includes('cafe')) {
+        icon = types.includes('cafe') ? '☕' : '🍽️';
+      } else if (types.includes('park') || types.includes('garden')) {
+        icon = '🌳';
+      } else if (types.includes('hospital') || types.includes('clinic')) {
+        icon = '🏥';
+      } else if (types.includes('bank') || types.includes('atm')) {
+        icon = '🏧';
+      } else if (types.includes('hotel') || types.includes('lodging')) {
+        icon = '🏨';
+      } else if (types.includes('store') || types.includes('grocery_or_supermarket')) {
+        icon = '🛒';
+      }
+
+      return {
+        id: item.place_id || `ola-${i}`,
+        label: item.structured_formatting?.main_text || item.description?.split(',')[0] || query,
+        sublabel: item.structured_formatting?.secondary_text || item.description || '',
+        lat: item.geometry?.location?.lat,
+        lng: item.geometry?.location?.lng,
+        type: 'place' as const,
+        icon,
+      };
+    });
   } catch {
-    return localMatches.slice(0, 6);
+    return [];
   }
 }
 
+// Keeping a stub to avoid breaking external dependencies if they still import it,
+// but Ola Maps returns lat/lng directly in the autocomplete response!
+export async function resolveArcGISPlace(magicKey: string): Promise<{ lat: number, lng: number } | null> {
+  return null;
+}
+
+// Reverse geocode using Ola Maps — returns a clean, precise street-level address
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      { headers: { 'User-Agent': 'CivicOS/1.0' } }
-    );
+    const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${OLA_API_KEY}`;
+    const res = await fetch(url);
     const data = await res.json();
-    const addr = data.address;
-    return addr.road || addr.suburb || addr.city || 'Unknown location';
+    
+    if (data.results && data.results.length > 0) {
+      const addressParts = data.results[0].formatted_address.split(', ');
+      // Take first 3 parts to keep it readable and concise, e.g., "Lots Hospital, Chatterjee Lane, Tiretta Bazaar"
+      return addressParts.slice(0, 3).join(', ');
+    }
+    
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
