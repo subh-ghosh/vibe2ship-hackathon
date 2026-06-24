@@ -16,9 +16,28 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-x pan-y;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* Allow text selection only in inputs */
+  input, textarea {
+    user-select: auto;
+    -webkit-user-select: auto;
+  }
+
+  /* Hide scrollbars for all elements, but keep functionality */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   #root {
@@ -40,10 +59,11 @@
     }
   }
 
-  /* Hide leaflet attribution branding for cleaner look */
-  .leaflet-control-attribution {
-    font-size: 9px !important;
-    background: rgba(255,255,255,0.7) !important;
+  /* Hide branding for cleaner look */
+  .leaflet-control-attribution,
+  .maplibregl-ctrl-attrib,
+  .maplibregl-ctrl-logo {
+    display: none !important;
   }
 
   /* Leaflet controls */

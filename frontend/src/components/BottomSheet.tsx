@@ -54,8 +54,8 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
       animate={{ y: yOffset }}
-      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="absolute left-0 right-0 bg-white z-40 overflow-hidden"
+      transition={{ type: 'spring', damping: 28, stiffness: 400, mass: 0.8 }}
+      className="absolute left-0 right-0 bg-white z-40 overflow-hidden shadow-2xl"
       style={{
         top: '80px', // start exactly below the top search bar (if any) or just fill from 80px
         height: fullHeight,
