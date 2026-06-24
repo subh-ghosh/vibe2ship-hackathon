@@ -88,6 +88,17 @@ export default function MapView() {
   // Live location tracking
   useEffect(() => {
     window.__triggerMyLocation = () => {
+      // Request iOS 13+ device orientation permission
+      if (typeof (window as any).DeviceOrientationEvent !== 'undefined' && typeof (window as any).DeviceOrientationEvent.requestPermission === 'function') {
+        (window as any).DeviceOrientationEvent.requestPermission()
+          .then((permissionState: string) => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation as any, true);
+            }
+          })
+          .catch(console.error);
+      }
+
       if (!('geolocation' in navigator)) { alert('Geolocation not supported.'); return; }
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
 
