@@ -6,6 +6,12 @@ import { fetchRoute } from '../services/routing';
 export default function DirectionsSheet() {
   const { selectedPlace, userLocation, transportMode, setTransportMode, routes, setRoutes, mode, setMode, setSheetSnap } = useMapStore();
   const [loading, setLoading] = useState(false);
+  const [etas, setEtas] = useState<Record<string, string>>({
+    driving: '--',
+    'two-wheeler': '--',
+    transit: '--',
+    walking: '--'
+  });
 
   // Only recalculate route if user moves significantly (~111 meters) to stop map blinking
   const locKey = userLocation ? `${userLocation.lat.toFixed(3)},${userLocation.lng.toFixed(3)}` : '';
@@ -14,6 +20,21 @@ export default function DirectionsSheet() {
     if (!selectedPlace || !userLocation) return;
     let active = true;
     
+    // Fetch ETAs for all tabs concurrently
+    Promise.all([
+      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'driving'),
+      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'two-wheeler'),
+      fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, 'walking')
+    ]).then(([drivingRoute, bikeRoute, walkRoute]) => {
+      if (!active) return;
+      setEtas({
+        driving: drivingRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--',
+        'two-wheeler': bikeRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--',
+        transit: drivingRoute[0] ? drivingRoute[0].duration.replace('min', 'm').replace('hr', 'h') : '--', // Mock transit
+        walking: walkRoute[0]?.duration.replace('min', 'm').replace('hr', 'h') || '--'
+      });
+    });
+
     setLoading(true);
     fetchRoute(userLocation, { lat: selectedPlace.lat, lng: selectedPlace.lng }, transportMode).then(r => {
       if (!active) return;
@@ -38,10 +59,10 @@ export default function DirectionsSheet() {
         {/* Modes */}
         <div className="flex justify-between items-center mb-5 border-b border-gray-200 pb-2">
           {[
-            { id: 'driving', icon: Car, label: '35 hr' },
-            { id: 'two-wheeler', icon: Bike, label: '35 hr' },
-            { id: 'transit', icon: Train, label: '1 day' },
-            { id: 'walking', icon: Navigation, label: '17 days' } // Navigation used as placeholder for walk
+            { id: 'driving', icon: Car, label: etas['driving'] },
+            { id: 'two-wheeler', icon: Bike, label: etas['two-wheeler'] },
+            { id: 'transit', icon: Train, label: etas['transit'] },
+            { id: 'walking', icon: Navigation, label: etas['walking'] }
           ].map(m => (
             <button
               key={m.id}
