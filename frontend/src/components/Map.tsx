@@ -156,13 +156,13 @@ export default function MapView() {
         const diff = newHeading - lastHeading;
         const normalizedDiff = ((diff + 540) % 360) - 180;
         
-        // Ultra-heavy low-pass filter to prevent ANY standing jitter
-        if (Math.abs(normalizedDiff) > 5) { 
-          // Only snap fast if user turns more than 45 degrees
-          const smoothingFactor = Math.abs(normalizedDiff) > 45 ? 0.2 : 0.02;
-          lastHeading = lastHeading + normalizedDiff * smoothingFactor;
-          
-          // Round to nearest integer to stop Mapbox from rendering sub-degree micro-rotations
+        // Continuous smooth exponential moving average (no deadzones)
+        lastHeading = lastHeading + normalizedDiff * 0.05;
+        
+        // Only trigger React state updates at 15fps max to stop render thrashing
+        const now = Date.now();
+        if (now - (window as any)._lastHeadingUpdate > 66 || !(window as any)._lastHeadingUpdate) {
+          (window as any)._lastHeadingUpdate = now;
           setHeading(Math.round(lastHeading));
         }
       }
