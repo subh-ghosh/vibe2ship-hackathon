@@ -18,13 +18,15 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
   const { sheetSnap, setSheetSnap, mode } = useMapStore();
   const [isDragging, setIsDragging] = useState(false);
 
-  const snapHeights: Record<string, number> = {
-    peek: peekHeight,
-    half: halfHeight,
-    full: window.innerHeight - 80,
+  const fullHeight = window.innerHeight - 80;
+
+  const snapOffsets: Record<string, number> = {
+    peek: fullHeight - peekHeight,
+    half: fullHeight - halfHeight,
+    full: 0,
   };
 
-  const currentHeight = snapHeights[sheetSnap];
+  const yOffset = snapOffsets[sheetSnap];
 
   const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
     setIsDragging(false);
@@ -47,14 +49,16 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
   return (
     <motion.div
       drag="y"
-      dragConstraints={{ top: 0, bottom: 0 }}
+      dragConstraints={{ top: 0, bottom: fullHeight - peekHeight }}
       dragElastic={0.05}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
-      animate={{ height: currentHeight }}
+      animate={{ y: yOffset }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="absolute bottom-[80px] left-0 right-0 bg-white z-40 overflow-hidden"
+      className="absolute left-0 right-0 bg-white z-40 overflow-hidden"
       style={{
+        top: '80px', // start exactly below the top search bar (if any) or just fill from 80px
+        height: fullHeight,
         borderRadius: '20px 20px 0 0',
         boxShadow: '0 -2px 20px rgba(0,0,0,.25)',
       }}
@@ -75,7 +79,7 @@ export default function BottomSheet({ children, peekHeight = 160, halfHeight = 4
       <div
         className="overflow-y-auto"
         style={{
-          height: currentHeight - 24,
+          height: fullHeight - 24,
           overscrollBehavior: 'contain',
           WebkitOverflowScrolling: 'touch',
         }}
