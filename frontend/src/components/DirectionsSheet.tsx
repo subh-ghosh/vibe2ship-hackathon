@@ -4,7 +4,7 @@ import { useMapStore } from '../store/mapStore';
 import { fetchRoute } from '../services/routing';
 
 export default function DirectionsSheet() {
-  const { selectedPlace, userLocation, transportMode, setTransportMode, routes, setRoutes, setMode, setSheetSnap } = useMapStore();
+  const { selectedPlace, userLocation, transportMode, setTransportMode, routes, setRoutes, mode, setMode, setSheetSnap } = useMapStore();
   const [loading, setLoading] = useState(false);
 
   // Only recalculate route if user moves significantly (~111 meters) to stop map blinking
@@ -24,7 +24,7 @@ export default function DirectionsSheet() {
     return () => { active = false; };
   }, [selectedPlace, locKey, transportMode]);
 
-  if (!selectedPlace) return null;
+  if (!selectedPlace || mode !== 'directions') return null;
 
   const activeRoute = routes[0];
 

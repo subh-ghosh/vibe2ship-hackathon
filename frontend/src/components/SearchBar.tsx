@@ -113,7 +113,17 @@ export default function SearchBar() {
     return (
       <div className="absolute top-0 left-0 right-0 z-30 pt-3 px-4 pb-4 bg-white shadow-md rounded-b-[24px]">
         <div className="flex items-start gap-3">
-          <button onClick={() => { setMode('place'); setSheetSnap('half'); }} className="text-[#5F6368] mt-2 flex-shrink-0">
+          <button 
+            onClick={() => { 
+              setMode('place'); 
+              setSheetSnap('half'); 
+              if (selectedPlace) {
+                setCenter({ lat: selectedPlace.lat, lng: selectedPlace.lng });
+                setZoom(17);
+              }
+            }} 
+            className="text-[#5F6368] mt-2 flex-shrink-0"
+          >
             <ArrowLeft size={22} />
           </button>
           

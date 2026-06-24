@@ -145,6 +145,30 @@ export default function MapView() {
     }
   }, [center, zoom]);
 
+  // Fit bounds to route geometry automatically
+  useEffect(() => {
+    if (mode === 'directions' && routes.length > 0 && mapRef.current) {
+      const coordinates = routes[0].geometry;
+      if (coordinates && coordinates.length > 0) {
+        const bounds = coordinates.reduce(
+          (acc, coord) => [
+            Math.min(acc[0], coord[0]), // minLng
+            Math.min(acc[1], coord[1]), // minLat
+            Math.max(acc[2], coord[0]), // maxLng
+            Math.max(acc[3], coord[1]), // maxLat
+          ],
+          [Infinity, Infinity, -Infinity, -Infinity]
+        );
+
+        // Define bounding box array: [minLng, minLat, maxLng, maxLat]
+        mapRef.current.fitBounds(bounds as [number, number, number, number], {
+          padding: { top: 120, bottom: 450, left: 50, right: 50 },
+          duration: 1000,
+        });
+      }
+    }
+  }, [routes, mode]);
+
   // mapStyle moved outside to prevent flickering
 
   const handlePlaceClick = (place: NearbyPlace) => {
