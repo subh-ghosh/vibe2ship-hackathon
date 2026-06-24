@@ -144,7 +144,7 @@ export default function MapView() {
 
     const handleOrientation = (e: DeviceOrientationEvent) => {
       // Ignore compass if moving (GPS course handled in watchPosition)
-      if (useMapStore.getState().userSpeed > 3.6) return; 
+      if ((useMapStore.getState().userSpeed || 0) > 3.6) return; 
 
       let newHeading = null;
       if ('webkitCompassHeading' in e) {
@@ -261,8 +261,8 @@ export default function MapView() {
   }, [mode, userLocation, heading]);
 
   useEffect(() => {
-    if (mode === 'directions' && mapRef.current) {
-      // Reset pitch when entering nav/directions mode
+    if (mode !== 'active_nav' && mapRef.current) {
+      // Reset pitch and bearing when exiting nav mode to flatten the map back to 2D
       mapRef.current.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
     }
   }, [mode]);
@@ -354,7 +354,14 @@ export default function MapView() {
 
       {/* User location blue dot + heading cone */}
       {userLocation && (
-        <Marker longitude={userLocation.lng} latitude={userLocation.lat} anchor="center" rotation={heading ?? 0}>
+        <Marker 
+          longitude={userLocation.lng} 
+          latitude={userLocation.lat} 
+          anchor="center" 
+          rotation={heading ?? 0}
+          rotationAlignment="map"
+          pitchAlignment="map"
+        >
           <div style={{ position: 'relative', width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {heading !== null && (
               <svg width="60" height="60" viewBox="0 0 60 60" style={{ position: 'absolute', top: 0, left: 0 }}>
