@@ -20,6 +20,8 @@ export default function App() {
   const [denied, setDenied] = useState(false);
 
   useEffect(() => {
+    // Fetch dynamic civic issues from backend
+    useMapStore.getState().fetchIssues();
 
     if (!('geolocation' in navigator)) {
       // No geolocation support — just show map at default

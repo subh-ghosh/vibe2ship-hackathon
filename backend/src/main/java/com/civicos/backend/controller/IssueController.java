@@ -1,5 +1,11 @@
 package com.civicos.backend.controller;
 
+import com.civicos.backend.model.Issue;
+import com.civicos.backend.repository.IssueRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,7 +13,11 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*") // Added basic CORS for hackathon
 public class IssueController {
+
+    @Autowired
+    private IssueRepository issueRepository;
 
     // GET /api/issues — list all issues
     @GetMapping("/issues")
@@ -15,11 +25,15 @@ public class IssueController {
             @RequestParam(defaultValue = "all") String type,
             @RequestParam(defaultValue = "all") String severity,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        // Returns mock response — replace with JPA repository call
+            @RequestParam(defaultValue = "200") int size) {
+        
+        Page<Issue> issuesPage = issueRepository.findAll(PageRequest.of(page, size, Sort.by("createdAt").descending()));
+        
         return ResponseEntity.ok(Map.of(
             "status", "ok",
-            "message", "Connect to PostgreSQL and use IssueRepository to serve real data",
+            "content", issuesPage.getContent(),
+            "totalPages", issuesPage.getTotalPages(),
+            "totalElements", issuesPage.getTotalElements(),
             "page", page,
             "size", size
         ));
@@ -27,13 +41,13 @@ public class IssueController {
 
     // POST /api/issues — create issue
     @PostMapping("/issues")
-    public ResponseEntity<Map<String, Object>> createIssue(@RequestBody Map<String, Object> body) {
-        String issueId = "ISS-" + System.currentTimeMillis();
-        return ResponseEntity.ok(Map.of(
-            "id", issueId,
-            "status", "reported",
-            "message", "Issue created successfully"
-        ));
+    public ResponseEntity<Issue> createIssue(@RequestBody Issue issue) {
+        if (issue.getStatus() == null) issue.setStatus("reported");
+        if (issue.getSeverity() == null) issue.setSeverity("medium");
+        if (issue.getUpvotes() == null) issue.setUpvotes(1);
+        
+        Issue saved = issueRepository.save(issue);
+        return ResponseEntity.ok(saved);
     }
 
     // POST /api/issues/{id}/verify — verify issue

@@ -21,24 +21,17 @@ export default function IssueReportSheet() {
 
   if (mode !== 'report') return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedCat) return;
     
-    const newIssue: Issue = {
-      id: `issue-${Date.now()}`,
+    setStep(2); // Show success immediately for optimistic UI
+    
+    await useMapStore.getState().createIssue({
       type: selectedCat as Issue['type'],
       lat: userLocation ? userLocation.lat : center.lat,
       lng: userLocation ? userLocation.lng : center.lng,
-      status: 'reported',
-      severity: 'medium', // Mock AI classification
-      upvotes: 1,
-      downvotes: 0,
-      createdAt: new Date().toISOString(),
       description: desc
-    };
-
-    setIssues([newIssue, ...issues]);
-    setStep(2);
+    });
     
     // Auto close after 2 seconds
     setTimeout(() => {

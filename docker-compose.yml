@@ -13,6 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/seed_india.sql:/docker-entrypoint-initdb.d/seed_india.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U civicos"]
       interval: 10s
