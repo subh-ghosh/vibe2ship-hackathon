@@ -36,15 +36,29 @@ export async function fetchRoute(origin: LatLng, destination: LatLng, mode: Tran
         durationStr = `${durationMins} min`;
       }
 
+      let type: 'fastest' | 'highway' | 'avoid_tolls' | 'civic' = 'fastest';
+      let label = 'Fastest route';
+      let color = '#1A73E8'; // Blue
+      
+      if (i === 1) {
+        type = 'civic';
+        label = 'Safest Route';
+        color = '#34A853'; // Green
+      } else if (i === 2) {
+        type = 'civic';
+        label = 'Civic Recommended';
+        color = '#F29900'; // Orange
+      }
+
       return {
-        type: i === 0 ? 'fastest' : 'alternative',
-        label: i === 0 ? 'Fastest route' : 'Alternative route',
+        type,
+        label,
         distance: `${distanceKm} km`,
         duration: durationStr,
         durationSeconds: r.duration,
         geometry: r.geometry.coordinates,
         via: r.legs[0]?.summary || 'Main highway',
-        color: i === 0 ? '#1A73E8' : '#8AB4F8',
+        color,
         trafficLevel: 'light',
       } as Route;
     });

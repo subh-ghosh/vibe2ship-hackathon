@@ -4,7 +4,11 @@ import { useMapStore } from '../store/mapStore';
 import { fetchRoute } from '../services/routing';
 
 export default function DirectionsSheet() {
-  const { selectedPlace, userLocation, transportMode, setTransportMode, routes, setRoutes, mode, setMode, setSheetSnap } = useMapStore();
+  const { 
+    selectedPlace, userLocation, transportMode, setTransportMode, 
+    routes, setRoutes, mode, setMode, setSheetSnap,
+    selectedRouteIndex, setSelectedRouteIndex 
+  } = useMapStore();
   const [loading, setLoading] = useState(false);
   const [etas, setEtas] = useState<Record<string, string>>({
     driving: '--',
@@ -50,8 +54,6 @@ export default function DirectionsSheet() {
 
   if (!selectedPlace || mode !== 'directions') return null;
 
-  const activeRoute = routes[0];
-
   return (
     <div className="h-full bg-white flex flex-col pt-1">
       <div className="px-5 pt-2 pb-3">
@@ -89,17 +91,45 @@ export default function DirectionsSheet() {
             <div className="h-6 bg-gray-200 rounded w-1/3"></div>
             <div className="h-4 bg-gray-200 rounded w-2/3"></div>
           </div>
-        ) : activeRoute ? (
+        ) : routes.length > 0 ? (
           <div>
+            {/* Route Options Chips */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-2" style={{ scrollbarWidth: 'none' }}>
+              {routes.map((r, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedRouteIndex(i)}
+                  className={`flex flex-col flex-shrink-0 px-4 py-2 rounded-xl border-2 transition-colors ${
+                    selectedRouteIndex === i 
+                      ? 'border-[#1A73E8] bg-[#E8F0FE]' 
+                      : 'border-[#DADCE0] bg-white'
+                  }`}
+                  style={{ minWidth: '130px' }}
+                >
+                  <span className={`text-[15px] font-medium ${selectedRouteIndex === i ? 'text-[#1A73E8]' : 'text-[#1F1F1F]'}`}>
+                    {r.duration}
+                  </span>
+                  <span className="text-[12px] text-[#5F6368]">{r.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-end gap-2 mb-1">
               <span className="text-[24px] text-[#146C2E] font-normal" style={{ fontFamily: 'Google Sans, sans-serif' }}>
-                {activeRoute.duration}
+                {routes[selectedRouteIndex]?.duration}
               </span>
-              <span className="text-[16px] text-[#5F6368] mb-1">({activeRoute.distance})</span>
+              <span className="text-[16px] text-[#5F6368] mb-1">({routes[selectedRouteIndex]?.distance})</span>
             </div>
-            <p className="text-[13px] text-[#5F6368] mb-1">Fastest route now, avoids road closures</p>
+            
+            <p className="text-[13px] text-[#5F6368] mb-1">
+              {selectedRouteIndex === 0 && 'Fastest route now, avoids road closures.'}
+              {selectedRouteIndex === 1 && 'Safest route. Avoids high-risk intersections.'}
+              {selectedRouteIndex === 2 && 'Civic recommended. Smooth roads, no potholes.'}
+            </p>
+            
             <p className="text-[13px] text-[#146C2E] flex items-center gap-1 mb-5">
-              <span className="w-3 h-3 border border-[#146C2E] rounded-full inline-block" /> Saves fuel
+              <span className="w-3 h-3 border border-[#146C2E] rounded-full inline-block" /> 
+              {selectedRouteIndex === 2 ? 'High Infrastructure Health (94/100)' : 'Saves fuel'}
             </p>
 
             {/* Actions */}

@@ -38,7 +38,8 @@ export default function MapView() {
     center, zoom, selectedPlace,
     userLocation, setUserLocation,
     setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom,
-    mode, searchQuery, routes, setExploreCenter
+    mode, searchQuery, routes, setExploreCenter,
+    issues, selectedRouteIndex
   } = useMapStore();
 
   const mapRef = useRef<MapRef>(null);
@@ -447,11 +448,70 @@ export default function MapView() {
          </Marker>
       )}
 
+      {/* Civic Issues Markers */}
+      {issues.map(issue => {
+        const getIcon = (type: string) => {
+          switch(type) {
+            case 'pothole': return '🕳️';
+            case 'garbage': return '🗑️';
+            case 'water_leak': return '💧';
+            case 'broken_light': return '💡';
+            case 'road_damage': return '🚧';
+            case 'flooding': return '🌊';
+            case 'manhole': return '⚠️';
+            default: return '⚠️';
+          }
+        };
+        const getColor = (sev: string) => {
+          switch(sev) {
+            case 'low': return '#FBBC04';
+            case 'medium': return '#F29900';
+            case 'high': return '#EA4335';
+            case 'critical': return '#C5221F';
+            default: return '#EA4335';
+          }
+        };
+
+        return (
+          <Marker key={issue.id} longitude={issue.lng} latitude={issue.lat} anchor="center">
+            <div
+              title={issue.description}
+              style={{
+                background: 'white',
+                borderRadius: '50%',
+                border: `3px solid ${getColor(issue.severity)}`,
+                width: 32,
+                height: 32,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 16,
+                boxShadow: '0 2px 6px rgba(0,0,0,.2)',
+                cursor: 'pointer',
+                opacity: mode === 'active_nav' ? 0.4 : 1, // Dim during active navigation
+              }}
+            >
+              {getIcon(issue.type)}
+            </div>
+          </Marker>
+        );
+      })}
+
 
 
       {/* Route layers */}
-      {(mode === 'directions' || mode === 'active_nav') && routeSources.map((source, i) => {
-        if (mode === 'active_nav' && i !== 0) return null; // Hide alternate routes when navigating
+      {(mode === 'directions' || mode === 'active_nav') && routeSources
+        // Sort to render selected route last (on top)
+        .slice().sort((a, b) => {
+          const aIndex = routeSources.indexOf(a);
+          const bIndex = routeSources.indexOf(b);
+          if (aIndex === selectedRouteIndex) return 1;
+          if (bIndex === selectedRouteIndex) return -1;
+          return 0;
+        })
+        .map((source) => {
+        const i = routeSources.indexOf(source);
+        const isSelected = selectedRouteIndex === i;
+        if (mode === 'active_nav' && !isSelected) return null; // Hide alternate routes when navigating
+        
         return (
         <Source key={source.id} id={source.id} type="geojson" data={source.geojsonData}>
           <Layer
@@ -459,9 +519,9 @@ export default function MapView() {
             type="line"
             layout={{ 'line-join': 'round', 'line-cap': 'round' }}
             paint={{
-              'line-color': '#185ABC', // Darker blue outline
-              'line-width': i === 0 ? 10 : 8,
-              'line-opacity': i === 0 ? 1 : 0.6
+              'line-color': isSelected ? '#185ABC' : source.color, // Darker blue outline for selected
+              'line-width': isSelected ? 10 : 8,
+              'line-opacity': isSelected ? 1 : 0.6
             }}
           />
           <Layer
@@ -470,8 +530,8 @@ export default function MapView() {
             layout={{ 'line-join': 'round', 'line-cap': 'round' }}
             paint={{
               'line-color': source.color,
-              'line-width': i === 0 ? 6 : 4,
-              'line-opacity': i === 0 ? 1 : 0.6
+              'line-width': isSelected ? 6 : 4,
+              'line-opacity': isSelected ? 1 : 0.6
             }}
           />
         </Source>
