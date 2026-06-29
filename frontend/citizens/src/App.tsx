@@ -14,6 +14,7 @@ import IssueReportSheet from './components/IssueReportSheet';
 import IssueDetailSheet from './components/IssueDetailSheet';
 import ProfileSheet from './components/ProfileSheet';
 import HeroReportButton from './components/HeroReportButton';
+import NotificationToast from './components/NotificationToast';
 import { useMapStore } from './store/mapStore';
 import SplashScreen from './components/SplashScreen';
 
@@ -61,6 +62,7 @@ export default function App() {
   return (
     <div className="relative w-full h-full bg-[#E8EAED] overflow-hidden select-none">
       <SplashScreen />
+      <NotificationToast />
       
       {/* Ghost loader — shown until location resolves */}
       {(locating || denied) && <LocationLoader denied={denied} />}

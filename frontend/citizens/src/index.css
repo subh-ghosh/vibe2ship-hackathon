@@ -193,6 +193,15 @@
   to { transform: translateY(100%); }
 }
 
+@keyframes slideInDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-down {
+  animation: slideInDown 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 .slide-up { animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
 
 /* Route step icon */

@@ -17,7 +17,7 @@ export default function HeroReportButton() {
       style={{ fontFamily: 'Google Sans, sans-serif' }}
     >
       <PlusCircle size={22} />
-      Report Civic Issue
+      Report Issue
     </button>
   );
 }
