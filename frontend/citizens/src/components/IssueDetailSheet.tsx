@@ -65,7 +65,7 @@ export default function IssueDetailSheet() {
         <div className="border-t border-[#E8EAED] pt-5">
           <h3 className="font-medium text-[#1F1F1F] mb-3 text-sm">Community Verification Request</h3>
           <p className="text-[#5F6368] text-xs mb-4">
-            Are you currently near this location? Please verify if this issue still exists to help the authorities and earn Civic Points.
+            Are you currently near this location? Please verify if this issue still exists to help the authorities and earn Local Guide Points.
           </p>
 
           <div className="flex gap-3">

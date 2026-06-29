@@ -23,7 +23,7 @@ export default function ProfileSheet() {
             <div className="flex items-center gap-2">
               <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-sm flex items-center gap-1">
                 <Trophy size={12} className="text-yellow-300" />
-                Civic Champion
+                Local Guide Champion
               </span>
             </div>
           </div>

@@ -43,7 +43,7 @@ export default function ActiveNavOverlay() {
             <AlertTriangle size={18} strokeWidth={2.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[13px] font-bold text-[#1A73E8] uppercase tracking-wide leading-none mb-1">CivicOS AI Active</span>
+            <span className="text-[13px] font-bold text-[#1A73E8] uppercase tracking-wide leading-none mb-1">AI Hazard Detection</span>
             <span className="text-[13px] text-[#3C4043] leading-snug">Rerouting you around a newly reported water leak 1.2km ahead.</span>
           </div>
         </div>

@@ -81,7 +81,7 @@ export default function ExploreSheet() {
             }}
             className="flex-[2] bg-[#1A73E8] text-white py-2.5 rounded-full font-medium text-[15px] flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform"
           >
-            <span className="text-xl leading-none">+</span> Report Civic Issue
+            <span className="text-xl leading-none">+</span> Report Infrastructure Issue
           </button>
           <button className="flex-1 bg-[#F1F3F4] text-[#1F1F1F] py-2.5 rounded-full font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
             <Bookmark size={18} /> Save

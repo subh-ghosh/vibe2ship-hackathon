@@ -1,6 +1,6 @@
 {
-  "name": "CivicOS",
-  "short_name": "CivicOS",
+  "name": "Google Maps Community Layer",
+  "short_name": "Community Maps",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",

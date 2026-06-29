@@ -65,9 +65,14 @@ export default function App() {
       {/* Sidebar */}
       <aside className="w-64 border-r border-[#30363D] bg-[#161B22] flex flex-col z-20">
         <div className="h-16 flex items-center px-6 border-b border-[#30363D]">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-            CivicOS <span className="text-sm font-medium text-slate-400">Command</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <div className="bg-[#1A73E8] p-2 rounded-lg">
+              <Bot className="text-white" size={24} />
+            </div>
+            <h1 className="text-xl font-bold text-white tracking-tight">
+              Community Intelligence <span className="text-sm font-medium text-slate-400">Command Center</span>
+            </h1>
+          </div>
         </div>
         
         <nav className="flex-1 py-4 px-3 space-y-1">

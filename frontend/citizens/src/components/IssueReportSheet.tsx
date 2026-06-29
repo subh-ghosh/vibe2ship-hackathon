@@ -55,7 +55,7 @@ export default function IssueReportSheet() {
               <MapPin size={20} />
             </div>
             <div>
-              <h2 className="text-[18px] font-medium text-[#1F1F1F]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Report Civic Issue</h2>
+              <h2 className="text-[18px] font-medium text-[#1F1F1F]" style={{ fontFamily: 'Google Sans, sans-serif' }}>Report Infrastructure Issue</h2>
               <p className="text-[13px] text-[#5F6368]">Help improve your city's infrastructure</p>
             </div>
           </div>

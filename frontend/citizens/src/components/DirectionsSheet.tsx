@@ -124,9 +124,9 @@ export default function DirectionsSheet() {
             <div className="flex flex-col gap-1 mb-5">
               <p className="text-[13px] text-[#5F6368] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#1A73E8]" />
-                {selectedRouteIndex === 0 && 'Fastest route. Civic AI optimized to avoid 3 reported potholes.'}
+                {selectedRouteIndex === 0 && 'Fastest route. AI optimized to avoid 3 reported potholes.'}
                 {selectedRouteIndex === 1 && 'Safest route. Avoids high-risk intersections and 2 flooded zones.'}
-                {selectedRouteIndex === 2 && 'Civic Recommended. 98/100 Infrastructure Health Score.'}
+                {selectedRouteIndex === 2 && 'Community Verified. 98/100 Infrastructure Health Score.'}
               </p>
               <p className="text-[13px] text-[#146C2E] flex items-center gap-1">
                 <span className="w-3 h-3 border border-[#146C2E] rounded-full inline-block flex items-center justify-center">

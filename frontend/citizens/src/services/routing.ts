@@ -46,7 +46,7 @@ export async function fetchRoute(origin: LatLng, destination: LatLng, mode: Tran
         color = '#34A853'; // Green
       } else if (i === 2) {
         type = 'civic';
-        label = 'Civic Recommended';
+        label = 'Community Verified';
         color = '#F29900'; // Orange
       }
 
