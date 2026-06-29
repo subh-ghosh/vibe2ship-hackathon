@@ -11,6 +11,7 @@ import DirectionsSheet from './components/DirectionsSheet';
 import LocationLoader from './components/LocationLoader';
 import ActiveNavOverlay from './components/ActiveNavOverlay';
 import IssueReportSheet from './components/IssueReportSheet';
+import HeroReportButton from './components/HeroReportButton';
 import { useMapStore } from './store/mapStore';
 import SplashScreen from './components/SplashScreen';
 
@@ -68,6 +69,7 @@ export default function App() {
           {mode !== 'active_nav' && (
             <>
               <MapControls />
+              <HeroReportButton />
               <SearchBar />
               <BottomSheet>
                 <PlaceDetail />

@@ -74,7 +74,16 @@ export default function ExploreSheet() {
       {/* Action buttons */}
       <div className="px-5 mt-1">
         <div className="flex gap-2 mb-5">
-          <button className="flex-1 bg-[#F1F3F4] text-[#1F1F1F] py-2.5 rounded-full font-medium text-sm flex items-center justify-center gap-2">
+          <button
+            onClick={() => {
+              setMode('report');
+              setSheetSnap('half');
+            }}
+            className="flex-[2] bg-[#1A73E8] text-white py-2.5 rounded-full font-medium text-[15px] flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform"
+          >
+            <span className="text-xl leading-none">+</span> Report Civic Issue
+          </button>
+          <button className="flex-1 bg-[#F1F3F4] text-[#1F1F1F] py-2.5 rounded-full font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
             <Bookmark size={18} /> Save
           </button>
           <button
@@ -83,12 +92,9 @@ export default function ExploreSheet() {
               if (navigator.share) navigator.share({ title: cityName, url });
               else navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
             }}
-            className="flex-1 bg-[#F1F3F4] text-[#1F1F1F] py-2.5 rounded-full font-medium text-sm flex items-center justify-center gap-2"
+            className="flex-1 bg-[#F1F3F4] text-[#1F1F1F] py-2.5 rounded-full font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
           >
             <Share2 size={18} /> Share
-          </button>
-          <button className="w-10 bg-[#F1F3F4] text-[#1F1F1F] rounded-full flex items-center justify-center">
-            <MoreHorizontal size={18} />
           </button>
         </div>
 
