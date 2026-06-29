@@ -12,6 +12,7 @@ import LocationLoader from './components/LocationLoader';
 import ActiveNavOverlay from './components/ActiveNavOverlay';
 import IssueReportSheet from './components/IssueReportSheet';
 import IssueDetailSheet from './components/IssueDetailSheet';
+import ProfileSheet from './components/ProfileSheet';
 import HeroReportButton from './components/HeroReportButton';
 import { useMapStore } from './store/mapStore';
 import SplashScreen from './components/SplashScreen';
@@ -78,6 +79,7 @@ export default function App() {
                 <ExploreSheet />
                 <IssueReportSheet />
                 <IssueDetailSheet />
+                <ProfileSheet />
               </BottomSheet>
               <BottomNav />
             </>

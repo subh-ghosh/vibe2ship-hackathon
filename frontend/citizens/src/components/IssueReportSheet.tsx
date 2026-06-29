@@ -18,6 +18,8 @@ export default function IssueReportSheet() {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [desc, setDesc] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   if (mode !== 'report') return null;
 
@@ -82,13 +84,39 @@ export default function IssueReportSheet() {
               placeholder="Add details for the authorities... (optional)"
               className="w-full h-24 p-3 rounded-xl border border-[#DADCE0] text-[14px] outline-none focus:border-[#1A73E8] resize-none"
             />
+            {previewUrl && (
+              <div className="relative mt-3 inline-block">
+                <img src={previewUrl} alt="Preview" className="h-20 w-20 object-cover rounded-xl border border-[#DADCE0]" />
+                <button 
+                  onClick={() => { setFile(null); setPreviewUrl(null); }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 mb-6 mt-auto">
-            <button className="flex-1 flex items-center justify-center gap-2 h-12 rounded-full bg-[#F1F3F4] text-[#1F1F1F] font-medium text-[14px]">
+            <input 
+              type="file" 
+              accept="image/*" 
+              id="photo-upload" 
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setFile(e.target.files[0]);
+                  setPreviewUrl(URL.createObjectURL(e.target.files[0]));
+                }
+              }}
+            />
+            <label 
+              htmlFor="photo-upload"
+              className="flex-1 flex items-center justify-center gap-2 h-12 rounded-full bg-[#F1F3F4] text-[#1F1F1F] font-medium text-[14px] cursor-pointer active:bg-[#E8EAED] transition-colors"
+            >
               <Camera size={18} />
-              Add Photo
-            </button>
+              {previewUrl ? 'Change Photo' : 'Add Photo'}
+            </label>
             <button 
               onClick={handleSubmit}
               disabled={!selectedCat}
