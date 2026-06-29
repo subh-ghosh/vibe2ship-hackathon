@@ -2,25 +2,62 @@ import { useState } from 'react';
 import { Activity, AlertTriangle, CheckCircle, Clock, Map as MapIcon, Users, Settings, Bell, Search, LayoutDashboard, X, Bot, Sparkles, Navigation } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const mockChartData = [
-  { name: 'Mon', reports: 40, resolved: 24 },
-  { name: 'Tue', reports: 30, resolved: 35 },
-  { name: 'Wed', reports: 20, resolved: 40 },
-  { name: 'Thu', reports: 50, resolved: 30 },
-  { name: 'Fri', reports: 65, resolved: 45 },
-  { name: 'Sat', reports: 80, resolved: 50 },
-  { name: 'Sun', reports: 45, resolved: 60 },
-];
-
-const issuesFeed = [
-  { id: 'ISS-001', type: 'Flooding', severity: 'Critical', location: 'Koramangala, Bangalore', time: '10 mins ago', status: 'Unassigned', aiConfidence: 98, desc: "Severe waterlogging up to 2 feet on 80ft road after rains." },
-  { id: 'ISS-002', type: 'Pothole', severity: 'High', location: 'Indiranagar 100ft Rd', time: '25 mins ago', status: 'Assigned', aiConfidence: 92, desc: "Deep pothole causing traffic jam near Metro station." },
-  { id: 'ISS-003', type: 'Broken Light', severity: 'Medium', location: 'HSR Layout Sec 4', time: '1 hr ago', status: 'Assigned', aiConfidence: 85, desc: "Streetlight flickering and completely out at night." },
-  { id: 'ISS-004', type: 'Garbage', severity: 'Low', location: 'Whitefield', time: '2 hrs ago', status: 'Resolved', aiConfidence: 99, desc: "Dumpster overflowing onto the sidewalk." },
-];
-
 export default function App() {
-  const [selectedIssue, setSelectedIssue] = useState<typeof issuesFeed[0] | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<any>(null);
+  const [issuesFeed, setIssuesFeed] = useState<any[]>([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    activeIssues: 1284,
+    criticalIssues: 42,
+    resolutionRate: 78.5,
+    avgResponse: '2h 15m'
+  });
+
+  const mockChartData = [
+    { name: 'Mon', reports: 40, resolved: 24 },
+    { name: 'Tue', reports: 30, resolved: 35 },
+    { name: 'Wed', reports: 20, resolved: 40 },
+    { name: 'Thu', reports: 50, resolved: 30 },
+    { name: 'Fri', reports: 65, resolved: 45 },
+    { name: 'Sat', reports: 80, resolved: 50 },
+    { name: 'Sun', reports: 45, resolved: 60 },
+  ];
+
+  // Fetch live issues from Spring Boot backend
+  useEffect(() => {
+    const fetchLiveIssues = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/issues?size=20');
+        const data = await res.json();
+        if (data && data.content) {
+          // Format for dashboard
+          const formatted = data.content.map((issue: any) => ({
+            id: issue.id.substring(0, 8).toUpperCase(),
+            rawId: issue.id,
+            type: issue.type.replace('_', ' '),
+            severity: issue.severity ? issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1) : 'Medium',
+            location: `${issue.lat.toFixed(4)}, ${issue.lng.toFixed(4)}`,
+            time: 'Just now',
+            status: issue.status === 'reported' ? 'Unassigned' : issue.status,
+            aiConfidence: issue.aiConfidence || 92,
+            desc: issue.description || 'No description provided.'
+          }));
+          setIssuesFeed(formatted);
+          
+          setDashboardStats(prev => ({
+            ...prev,
+            activeIssues: data.totalElements || prev.activeIssues
+          }));
+        }
+      } catch (e) {
+        console.error('Failed to fetch live issues', e);
+      }
+    };
+
+    fetchLiveIssues();
+    // Poll every 5 seconds for live demo magic
+    const interval = setInterval(fetchLiveIssues, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0D1117] text-[#C9D1D9] relative">
@@ -98,7 +135,7 @@ export default function App() {
                   <Activity size={20} className="text-blue-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">1,284</div>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.activeIssues}</div>
               <div className="text-sm text-emerald-400 flex items-center gap-1">
                 <span>↑ 12%</span> <span className="text-slate-500">vs last week</span>
               </div>
@@ -110,7 +147,7 @@ export default function App() {
                   <AlertTriangle size={20} className="text-red-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">42</div>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.criticalIssues}</div>
               <div className="text-sm text-red-400 flex items-center gap-1">
                 <span>↑ 4%</span> <span className="text-slate-500">vs last week</span>
               </div>
@@ -122,7 +159,7 @@ export default function App() {
                   <CheckCircle size={20} className="text-emerald-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">78.5%</div>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.resolutionRate}%</div>
               <div className="text-sm text-emerald-400 flex items-center gap-1">
                 <span>↑ 2.4%</span> <span className="text-slate-500">vs last week</span>
               </div>
@@ -134,7 +171,7 @@ export default function App() {
                   <Clock size={20} className="text-purple-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">2h 15m</div>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.avgResponse}</div>
               <div className="text-sm text-emerald-400 flex items-center gap-1">
                 <span>↓ 18m</span> <span className="text-slate-500">vs last week</span>
               </div>
