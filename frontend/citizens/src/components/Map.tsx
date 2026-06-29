@@ -39,7 +39,7 @@ export default function MapView() {
     userLocation, setUserLocation,
     setSelectedPlace, setMode, setSheetSnap, setCenter, setZoom,
     mode, searchQuery, routes, setExploreCenter,
-    issues, selectedRouteIndex
+    issues, selectedRouteIndex, showPredictions
   } = useMapStore();
 
   const mapRef = useRef<MapRef>(null);
@@ -260,6 +260,23 @@ export default function MapView() {
       color: route.color
     }));
   }, [routes]);
+
+  const issuesGeoJson = useMemo(() => {
+    return {
+      type: 'FeatureCollection' as const,
+      features: issues.map(issue => ({
+        type: 'Feature' as const,
+        properties: {
+          id: issue.id,
+          severity: issue.severity === 'critical' ? 4 : issue.severity === 'high' ? 3 : issue.severity === 'medium' ? 2 : 1
+        },
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [issue.lng, issue.lat]
+        }
+      }))
+    };
+  }, [issues]);
 
   // Adjust map for active navigation
   useEffect(() => {
@@ -545,6 +562,51 @@ export default function MapView() {
              <circle cx="12" cy="12" r="5" fill="#751A11" />
            </svg>
          </Marker>
+      )}
+
+      {/* AI Prediction Heatmap */}
+      {showPredictions && (
+        <Source id="predictions-heatmap-source" type="geojson" data={issuesGeoJson}>
+          <Layer
+            id="predictions-heatmap-layer"
+            type="heatmap"
+            paint={{
+              'heatmap-weight': [
+                'interpolate',
+                ['linear'],
+                ['get', 'severity'],
+                1, 0.2,
+                4, 1
+              ],
+              'heatmap-intensity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                0, 1,
+                15, 3
+              ],
+              'heatmap-color': [
+                'interpolate',
+                ['linear'],
+                ['heatmap-density'],
+                0, 'rgba(33,102,172,0)',
+                0.2, 'rgb(103,169,207)',
+                0.4, 'rgb(209,229,240)',
+                0.6, 'rgb(253,219,199)',
+                0.8, 'rgb(239,138,98)',
+                1, 'rgb(178,24,43)'
+              ],
+              'heatmap-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                0, 2,
+                15, 20
+              ],
+              'heatmap-opacity': 0.7
+            }}
+          />
+        </Source>
       )}
 
     </Map>

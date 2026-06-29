@@ -45,6 +45,9 @@ interface MapStore {
   setRoutes: (r: import('../types').Route[]) => void;
   selectedRouteIndex: number;
   setSelectedRouteIndex: (i: number) => void;
+  
+  showPredictions: boolean;
+  setShowPredictions: (b: boolean) => void;
 
   // Civic Issues
   issues: import('../types').Issue[];
@@ -129,6 +132,9 @@ export const useMapStore = create<MapStore>()(
       setRoutes: (routes) => set({ routes }),
       selectedRouteIndex: 0,
       setSelectedRouteIndex: (selectedRouteIndex) => set({ selectedRouteIndex }),
+
+      showPredictions: false,
+      setShowPredictions: (showPredictions) => set({ showPredictions }),
 
       issues: DEFAULT_MOCK_ISSUES,
       setIssues: (issues) => set({ issues }),

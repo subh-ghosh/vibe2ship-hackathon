@@ -2,7 +2,7 @@ import { Crosshair, Plus, Minus } from 'lucide-react';
 import { useMapStore } from '../store/mapStore';
 
 export default function MapControls() {
-  const { setMode, mode, sheetSnap } = useMapStore();
+  const { setMode, mode, sheetSnap, showPredictions, setShowPredictions } = useMapStore();
 
   if (mode === 'search') return null;
 
@@ -37,10 +37,23 @@ export default function MapControls() {
 
 
 
+        {/* AI Prediction Layer Toggle */}
+        <button
+          onClick={() => setShowPredictions(!showPredictions)}
+          className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md overflow-hidden border border-[#E8EAED] hover:bg-[#F1F3F4] active:bg-[#E8EAED] transition-colors"
+          title="Toggle AI Predictions"
+          style={{
+            background: showPredictions ? '#E8F0FE' : 'white',
+            borderColor: showPredictions ? '#1A73E8' : '#E8EAED'
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>✨</span>
+        </button>
+
         {/* My Location */}
         <button
           onClick={() => window.__triggerMyLocation?.()}
-          className="gm-fab-small"
+          className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md overflow-hidden border border-[#E8EAED] hover:bg-[#F1F3F4] active:bg-[#E8EAED] transition-colors"
           title="My location"
         >
           <Crosshair size={20} color="#5F6368" />
