@@ -143,7 +143,7 @@ export const useMapStore = create<MapStore>()(
       
       fetchIssues: async () => {
         try {
-          const res = await fetch('http://localhost:8080/api/issues?size=200');
+          const res = await fetch('http://localhost:8080/api/issues?size=10000');
           const data = await res.json();
           if (data && data.content && data.content.length > 0) {
             set({ issues: data.content });

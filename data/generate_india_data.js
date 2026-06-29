@@ -14,7 +14,7 @@ const generateData = () => {
 
   let sql = 'INSERT INTO issues (type, title, description, lat, lng, severity, status, upvotes, downvotes) VALUES\n';
 
-  const numRecords = 5000;
+  const numRecords = 100000;
   for (let i = 0; i < numRecords; i++) {
     const type = types[Math.floor(Math.random() * types.length)];
     const severity = severities[Math.floor(Math.random() * severities.length)];
@@ -56,7 +56,7 @@ const generateData = () => {
     }
   }
 
-  fs.writeFileSync('seed_india.sql', sql);
+  fs.writeFileSync('seed_100k.sql', sql);
 };
 
 generateData();
