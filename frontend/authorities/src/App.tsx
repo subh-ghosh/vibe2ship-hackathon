@@ -7,10 +7,12 @@ export default function App() {
   const [selectedIssue, setSelectedIssue] = useState<any>(null);
   const [issuesFeed, setIssuesFeed] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState({
-    activeIssues: 1284,
-    criticalIssues: 42,
-    resolutionRate: 78.5,
-    avgResponse: '2h 15m'
+    totalReports: 0,
+    activeIssues: 0,
+    criticalIssues: 0,
+    resolutionRate: 0,
+    healthScore: 84,
+    dispatched: 0
   });
 
   const mockChartData = [
@@ -37,26 +39,41 @@ export default function App() {
             type: issue.type.replace('_', ' '),
             severity: issue.severity ? issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1) : 'Medium',
             location: `${issue.lat.toFixed(4)}, ${issue.lng.toFixed(4)}`,
-            time: 'Just now',
-            status: issue.status === 'reported' ? 'Unassigned' : issue.status,
+            time: issue.createdAt ? new Date(issue.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+            status: issue.status === 'reported' ? 'Unassigned' : issue.status.charAt(0).toUpperCase() + issue.status.slice(1),
             aiConfidence: issue.aiConfidence || 92,
             desc: issue.description || 'No description provided.'
           }));
           setIssuesFeed(formatted);
-          
-          setDashboardStats(prev => ({
-            ...prev,
-            activeIssues: data.totalElements || prev.activeIssues
-          }));
         }
       } catch (e) {
         console.error('Failed to fetch live issues', e);
       }
     };
 
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/dashboard');
+        const data = await res.json();
+        if (data) {
+          setDashboardStats({
+            totalReports: data.totalReports || 0,
+            activeIssues: data.activeIssues || 0,
+            criticalIssues: data.criticalIssues || 0,
+            resolutionRate: data.resolutionRate || 0,
+            healthScore: data.cityHealthScore || 84,
+            dispatched: data.dispatchedIssues || 0
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch dashboard stats', e);
+      }
+    };
+
     fetchLiveIssues();
+    fetchDashboardStats();
     // Poll every 5 seconds for live demo magic
-    const interval = setInterval(fetchLiveIssues, 5000);
+    const interval = setInterval(() => { fetchLiveIssues(); fetchDashboardStats(); }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -127,7 +144,7 @@ export default function App() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                 <Activity size={18} className="text-emerald-400" />
-                <span className="text-emerald-400 font-medium">Health Score: 84/100</span>
+                <span className="text-emerald-400 font-medium">Health Score: {dashboardStats.healthScore}/100</span>
               </div>
             </div>
           </div>
@@ -141,9 +158,9 @@ export default function App() {
                   <Activity size={20} className="text-blue-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.activeIssues}</div>
-              <div className="text-sm text-emerald-400 flex items-center gap-1">
-                <span>↑ 12%</span> <span className="text-slate-500">vs last week</span>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.totalReports.toLocaleString()}</div>
+              <div className="text-sm text-blue-400 flex items-center gap-1">
+                <span>{dashboardStats.activeIssues.toLocaleString()} active</span>
               </div>
             </div>
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
@@ -153,9 +170,9 @@ export default function App() {
                   <AlertTriangle size={20} className="text-red-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.criticalIssues}</div>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.criticalIssues.toLocaleString()}</div>
               <div className="text-sm text-red-400 flex items-center gap-1">
-                <span>↑ 4%</span> <span className="text-slate-500">vs last week</span>
+                <span>Requires immediate attention</span>
               </div>
             </div>
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
@@ -167,20 +184,21 @@ export default function App() {
               </div>
               <div className="text-3xl font-bold text-white mb-1">{dashboardStats.resolutionRate}%</div>
               <div className="text-sm text-emerald-400 flex items-center gap-1">
-                <span>↑ 2.4%</span> <span className="text-slate-500">vs last week</span>
+                <span>Computed from live data</span>
               </div>
             </div>
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-slate-400 font-medium">Avg. Response</h3>
+                <h3 className="text-slate-400 font-medium">Teams Dispatched</h3>
                 <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Clock size={20} className="text-purple-400" />
+                  <Navigation size={20} className="text-purple-400" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.avgResponse}</div>
-              <div className="text-sm text-emerald-400 flex items-center gap-1">
-                <span>↓ 18m</span> <span className="text-slate-500">vs last week</span>
+              <div className="text-3xl font-bold text-white mb-1">{dashboardStats.dispatched.toLocaleString()}</div>
+              <div className="text-sm text-purple-400 flex items-center gap-1">
+                <span>Field teams active</span>
               </div>
+            </div>
             </div>
           </div>
 

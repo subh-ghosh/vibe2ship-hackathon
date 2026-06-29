@@ -20,4 +20,8 @@ public interface IssueRepository extends JpaRepository<Issue, UUID> {
             @Param("minLng") Double minLng,
             @Param("maxLng") Double maxLng
     );
+
+    long countByStatus(String status);
+    long countBySeverity(String severity);
+    long countByStatusNot(String status);
 }

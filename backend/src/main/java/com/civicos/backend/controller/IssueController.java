@@ -163,15 +163,27 @@ public class IssueController {
         ));
     }
 
-    // GET /api/dashboard — authority dashboard summary
+    // GET /api/dashboard — authority dashboard summary (live from DB)
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> getDashboard() {
+        long total = issueRepository.count();
+        long resolved = issueRepository.countByStatus("resolved");
+        long active = total - resolved;
+        long critical = issueRepository.countBySeverity("critical");
+        long dispatched = issueRepository.countByStatus("dispatched");
+        double resolutionRate = total > 0 ? Math.round((double) resolved / total * 1000.0) / 10.0 : 0;
+        
+        // Compute a simple city health score: 100 - (critical/total * 100)
+        int healthScore = total > 0 ? (int) Math.round(100 - ((double) critical / total * 100)) : 100;
+        
         return ResponseEntity.ok(Map.of(
-            "cityHealthScore", 67,
-            "activeIssues", 112,
-            "criticalIssues", 14,
-            "resolvedToday", 8,
-            "totalAffectedPopulation", 245000
+            "totalReports", total,
+            "activeIssues", active,
+            "criticalIssues", critical,
+            "resolvedIssues", resolved,
+            "dispatchedIssues", dispatched,
+            "resolutionRate", resolutionRate,
+            "cityHealthScore", healthScore
         ));
     }
 
