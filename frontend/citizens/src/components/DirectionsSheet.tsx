@@ -121,16 +121,20 @@ export default function DirectionsSheet() {
               <span className="text-[16px] text-[#5F6368] mb-1">({routes[selectedRouteIndex]?.distance})</span>
             </div>
             
-            <p className="text-[13px] text-[#5F6368] mb-1">
-              {selectedRouteIndex === 0 && 'Fastest route now, avoids road closures.'}
-              {selectedRouteIndex === 1 && 'Safest route. Avoids high-risk intersections.'}
-              {selectedRouteIndex === 2 && 'Civic recommended. Smooth roads, no potholes.'}
-            </p>
-            
-            <p className="text-[13px] text-[#146C2E] flex items-center gap-1 mb-5">
-              <span className="w-3 h-3 border border-[#146C2E] rounded-full inline-block" /> 
-              {selectedRouteIndex === 2 ? 'High Infrastructure Health (94/100)' : 'Saves fuel'}
-            </p>
+            <div className="flex flex-col gap-1 mb-5">
+              <p className="text-[13px] text-[#5F6368] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1A73E8]" />
+                {selectedRouteIndex === 0 && 'Fastest route. Civic AI optimized to avoid 3 reported potholes.'}
+                {selectedRouteIndex === 1 && 'Safest route. Avoids high-risk intersections and 2 flooded zones.'}
+                {selectedRouteIndex === 2 && 'Civic Recommended. 98/100 Infrastructure Health Score.'}
+              </p>
+              <p className="text-[13px] text-[#146C2E] flex items-center gap-1">
+                <span className="w-3 h-3 border border-[#146C2E] rounded-full inline-block flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 bg-[#146C2E] rounded-full" />
+                </span> 
+                {selectedRouteIndex === 2 ? 'Real-time hazard free' : 'Saves fuel'}
+              </p>
+            </div>
 
             {/* Actions */}
             <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>

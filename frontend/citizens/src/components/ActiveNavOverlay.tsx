@@ -36,6 +36,17 @@ export default function ActiveNavOverlay() {
             <span className="text-[16px] font-medium">Follow route guidance</span>
           </div>
         </div>
+
+        {/* Civic Intelligence Live Banner */}
+        <div className="mt-3 bg-white/95 backdrop-blur shadow-md border border-[#1A73E8]/20 rounded-xl px-4 py-3 flex items-start gap-3 w-[90%] pointer-events-auto">
+          <div className="bg-[#E8F0FE] text-[#1A73E8] p-1.5 rounded-lg shrink-0">
+            <AlertTriangle size={18} strokeWidth={2.5} />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[13px] font-bold text-[#1A73E8] uppercase tracking-wide leading-none mb-1">CivicOS AI Active</span>
+            <span className="text-[13px] text-[#3C4043] leading-snug">Rerouting you around a newly reported water leak 1.2km ahead.</span>
+          </div>
+        </div>
       </div>
 
       {/* Floating Controls */}
