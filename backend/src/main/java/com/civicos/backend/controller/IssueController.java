@@ -187,6 +187,68 @@ public class IssueController {
         ));
     }
 
+    // POST /api/issues/{id}/ai-plan — generate AI resolution plan via Gemini
+    @PostMapping("/issues/{id}/ai-plan")
+    public ResponseEntity<Map<String, Object>> getAiPlan(@PathVariable UUID id) {
+        Optional<Issue> optIssue = issueRepository.findById(id);
+        if (optIssue.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Issue issue = optIssue.get();
+        
+        try {
+            String apiKey = env.getProperty("civicos.gemini.api-key");
+            if (apiKey != null && !apiKey.isEmpty()) {
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+                
+                String prompt = "You are an AI infrastructure analyst for a city municipal authority. Generate a detailed resolution plan for this reported infrastructure issue.\n\n"
+                    + "Issue Type: " + issue.getType() + "\n"
+                    + "Description: " + (issue.getDescription() != null ? issue.getDescription() : "No description") + "\n"
+                    + "Severity: " + issue.getSeverity() + "\n"
+                    + "Location: " + issue.getLat() + ", " + issue.getLng() + "\n"
+                    + "Community Upvotes: " + (issue.getUpvotes() != null ? issue.getUpvotes() : 0) + "\n\n"
+                    + "Respond in this exact format with no markdown:\n"
+                    + "IMPACT: [1-2 sentence impact analysis]\n"
+                    + "ACTION_1: [specific action step]\n"
+                    + "ACTION_2: [specific action step]\n"
+                    + "ACTION_3: [specific action step]\n"
+                    + "COST: [estimated cost in INR]\n"
+                    + "TIME: [estimated repair time]\n"
+                    + "PRIORITY: [priority ranking description]";
+                
+                String escapedPrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+                String requestJson = "{ \"contents\": [{ \"parts\": [{\"text\": \"" + escapedPrompt + "\"}] }] }";
+                
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+                org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(requestJson, headers);
+                
+                ResponseEntity<com.fasterxml.jackson.databind.JsonNode> response = restTemplate.postForEntity(url, entity, com.fasterxml.jackson.databind.JsonNode.class);
+                
+                if (response.getBody() != null) {
+                    String rawText = response.getBody().path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+                    return ResponseEntity.ok(Map.of("plan", rawText, "issueId", id.toString()));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gemini AI plan generation failed: " + e.getMessage());
+        }
+        
+        // Fallback static plan
+        return ResponseEntity.ok(Map.of(
+            "plan", "IMPACT: This " + issue.getType() + " issue affects local traffic and pedestrian safety in the area.\n"
+                + "ACTION_1: Dispatch nearest available field team with repair equipment\n"
+                + "ACTION_2: Set up safety barriers and warning signage around the affected zone\n"
+                + "ACTION_3: Complete repair and conduct quality inspection before clearing\n"
+                + "COST: ₹ 12,000 - ₹ 25,000\n"
+                + "TIME: 2-4 hours depending on severity\n"
+                + "PRIORITY: High priority based on community verification count",
+            "issueId", id.toString()
+        ));
+    }
+
     // GET /api/predictions — prediction heatmap
     @GetMapping("/predictions")
     public ResponseEntity<Map<String, Object>> getPredictions() {

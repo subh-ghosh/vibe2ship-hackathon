@@ -5,6 +5,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function App() {
   const [selectedIssue, setSelectedIssue] = useState<any>(null);
+  const [aiPlan, setAiPlan] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [issuesFeed, setIssuesFeed] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState({
     totalReports: 0,
@@ -76,6 +78,18 @@ export default function App() {
     const interval = setInterval(() => { fetchLiveIssues(); fetchDashboardStats(); }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch AI resolution plan when issue is selected
+  useEffect(() => {
+    if (!selectedIssue?.rawId) { setAiPlan(null); return; }
+    setAiLoading(true);
+    setAiPlan(null);
+    fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/ai-plan`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => { if (data?.plan) setAiPlan(data.plan); })
+      .catch(() => setAiPlan('IMPACT: Unable to reach AI service. Using fallback analysis.\nACTION_1: Dispatch nearest field team\nACTION_2: Assess on-site and report back\nACTION_3: Complete repair\nCOST: ₹ 10,000 - ₹ 20,000\nTIME: 2-3 hours\nPRIORITY: Standard'))
+      .finally(() => setAiLoading(false));
+  }, [selectedIssue?.rawId]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0D1117] text-[#C9D1D9] relative">
@@ -332,32 +346,64 @@ export default function App() {
                     Gemini AI Resolution Plan
                   </h3>
                   
-                  <div className="space-y-4 relative z-10">
-                    <div>
-                      <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Impact Analysis</div>
-                      <p className="text-sm text-slate-300">This issue affects a major arterial road. High risk of traffic congestion during peak hours (17:00 - 20:00). Estimated 15,000 vehicles impacted.</p>
+                  {aiLoading ? (
+                    <div className="space-y-3 animate-pulse">
+                      <div className="h-4 bg-slate-700 rounded w-full"></div>
+                      <div className="h-4 bg-slate-700 rounded w-5/6"></div>
+                      <div className="h-4 bg-slate-700 rounded w-4/6"></div>
+                      <div className="h-3 bg-slate-700 rounded w-3/6 mt-4"></div>
+                      <div className="h-4 bg-slate-700 rounded w-full"></div>
+                      <div className="h-4 bg-slate-700 rounded w-full"></div>
+                      <div className="h-4 bg-slate-700 rounded w-2/3"></div>
+                      <p className="text-xs text-blue-400 mt-3 flex items-center gap-1.5">
+                        <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-ping"></span>
+                        Gemini is analyzing this issue...
+                      </p>
                     </div>
-                    
-                    <div>
-                      <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Recommended Action</div>
-                      <ul className="text-sm text-slate-300 list-disc list-inside space-y-1">
-                        <li>Dispatch Emergency Response Team Alpha</li>
-                        <li>Requires 1 asphalt patch truck and 3 crew members</li>
-                        <li>Estimated time to repair: 45 minutes</li>
-                      </ul>
+                  ) : aiPlan ? (
+                    <div className="space-y-4 relative z-10">
+                      {(() => {
+                        const lines = aiPlan.split('\n').filter(l => l.trim());
+                        const impact = lines.find(l => l.startsWith('IMPACT:'))?.replace('IMPACT:', '').trim();
+                        const actions = lines.filter(l => l.startsWith('ACTION_')).map(l => l.replace(/ACTION_\d+:\s*/, '').trim());
+                        const cost = lines.find(l => l.startsWith('COST:'))?.replace('COST:', '').trim();
+                        const time = lines.find(l => l.startsWith('TIME:'))?.replace('TIME:', '').trim();
+                        const priority = lines.find(l => l.startsWith('PRIORITY:'))?.replace('PRIORITY:', '').trim();
+                        
+                        return (
+                          <>
+                            <div>
+                              <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Impact Analysis</div>
+                              <p className="text-sm text-slate-300">{impact || 'Analyzing impact...'}</p>
+                            </div>
+                            <div>
+                              <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Recommended Actions</div>
+                              <ul className="text-sm text-slate-300 list-disc list-inside space-y-1">
+                                {actions.length > 0 ? actions.map((a, i) => <li key={i}>{a}</li>) : <li>Dispatch field team</li>}
+                              </ul>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mt-2">
+                              <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
+                                <div className="text-xs text-slate-500 mb-1">Estimated Cost</div>
+                                <div className="font-mono text-emerald-400 font-bold">{cost || '₹ 10,000 - ₹ 25,000'}</div>
+                              </div>
+                              <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
+                                <div className="text-xs text-slate-500 mb-1">Repair Time</div>
+                                <div className="font-mono text-purple-400 font-bold">{time || '2-4 hours'}</div>
+                              </div>
+                            </div>
+                            {priority && (
+                              <div className="text-xs text-blue-300 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20 mt-1">
+                                <span className="font-bold uppercase tracking-wider">Priority:</span> {priority}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4 mt-2">
-                      <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
-                        <div className="text-xs text-slate-500 mb-1">Estimated Cost</div>
-                        <div className="font-mono text-emerald-400 font-bold">₹ 14,500</div>
-                      </div>
-                      <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
-                        <div className="text-xs text-slate-500 mb-1">Priority Rank</div>
-                        <div className="font-mono text-red-400 font-bold">#2 in Ward</div>
-                      </div>
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm">Select an issue to generate an AI resolution plan.</p>
+                  )}
                 </div>
               </div>
 
