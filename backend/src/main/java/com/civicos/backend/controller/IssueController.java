@@ -82,6 +82,26 @@ public class IssueController {
         if (issue.getSeverity() == null) issue.setSeverity("medium");
         if (issue.getAiConfidence() == null) issue.setAiConfidence(85); // fallback confidence
         
+        // --- AGENT 2: Duplicate Detection ---
+        if (issue.getLat() != null && issue.getLng() != null) {
+            double threshold = 0.0005; // Roughly 50 meters
+            List<Issue> duplicates = issueRepository.findNearbyDuplicates(
+                issue.getType(),
+                issue.getLat() - threshold,
+                issue.getLat() + threshold,
+                issue.getLng() - threshold,
+                issue.getLng() + threshold
+            );
+            
+            if (!duplicates.isEmpty()) {
+                Issue existing = duplicates.get(0);
+                existing.setUpvotes((existing.getUpvotes() == null ? 0 : existing.getUpvotes()) + 1);
+                existing.setTrustScore((existing.getTrustScore() == null ? 0 : existing.getTrustScore()) + 10);
+                System.out.println("Duplicate detected by Agent 2. Merged into " + existing.getId());
+                return ResponseEntity.ok(issueRepository.save(existing));
+            }
+        }
+        
         Issue saved = issueRepository.save(issue);
         return ResponseEntity.ok(saved);
     }

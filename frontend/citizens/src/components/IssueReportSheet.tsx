@@ -30,8 +30,8 @@ export default function IssueReportSheet() {
     
     await useMapStore.getState().createIssue({
       type: selectedCat as Issue['type'],
-      lat: userLocation ? userLocation.lat : center.lat,
-      lng: userLocation ? userLocation.lng : center.lng,
+      lat: center.lat,
+      lng: center.lng,
       description: desc
     });
     

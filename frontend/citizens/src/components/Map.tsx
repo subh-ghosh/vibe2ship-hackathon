@@ -573,6 +573,19 @@ export default function MapView() {
          </Marker>
       )}
 
+      {/* Target reporting pin for 'report' mode */}
+      {mode === 'report' && (
+        <Marker longitude={center.lng} latitude={center.lat} anchor="bottom">
+          <div className="flex flex-col items-center">
+            <div className="bg-[#1A73E8] text-white px-2 py-1 rounded shadow-md text-xs font-bold mb-1 whitespace-nowrap">Report Issue Here</div>
+            <svg width="24" height="34" viewBox="0 0 24 34">
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 22 12 22s12-14.5 12-22C24 5.373 18.627 0 12 0z" fill="#1A73E8" />
+              <circle cx="12" cy="12" r="5" fill="#ffffff" />
+            </svg>
+          </div>
+        </Marker>
+      )}
+
       {/* AI Prediction Heatmap */}
       {showPredictions && (
         <Source id="predictions-heatmap-source" type="geojson" data={issuesGeoJson}>
