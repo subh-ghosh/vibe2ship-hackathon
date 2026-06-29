@@ -39,12 +39,48 @@ public class IssueController {
         ));
     }
 
+    @Autowired
+    private org.springframework.core.env.Environment env;
+
     // POST /api/issues — create issue
     @PostMapping("/issues")
     public ResponseEntity<Issue> createIssue(@RequestBody Issue issue) {
         if (issue.getStatus() == null) issue.setStatus("reported");
-        if (issue.getSeverity() == null) issue.setSeverity("medium");
         if (issue.getUpvotes() == null) issue.setUpvotes(1);
+        
+        // --- GEMINI AI AGENT: Categorization & Impact Analysis ---
+        try {
+            String apiKey = env.getProperty("civicos.gemini.api-key");
+            if (apiKey != null && !apiKey.isEmpty() && issue.getDescription() != null) {
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+                
+                String prompt = "You are CivicOS AI. Analyze this civic issue: '" + issue.getDescription() + "'. Return ONLY a JSON object with: 1) severity (string: low, medium, high, critical), 2) confidence (integer 0-100). Example: {\"severity\": \"high\", \"confidence\": 92}";
+                
+                String requestJson = "{ \"contents\": [{ \"parts\": [{\"text\": \"" + prompt.replace("\"", "\\\"") + "\"}] }] }";
+                
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+                org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(requestJson, headers);
+                
+                ResponseEntity<com.fasterxml.jackson.databind.JsonNode> response = restTemplate.postForEntity(url, entity, com.fasterxml.jackson.databind.JsonNode.class);
+                
+                if (response.getBody() != null) {
+                    String rawText = response.getBody().path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+                    // Clean up markdown formatting if any
+                    rawText = rawText.replaceAll("```json", "").replaceAll("```", "").trim();
+                    
+                    com.fasterxml.jackson.databind.JsonNode aiResult = new com.fasterxml.jackson.databind.ObjectMapper().readTree(rawText);
+                    if (aiResult.has("severity")) issue.setSeverity(aiResult.get("severity").asText().toLowerCase());
+                    if (aiResult.has("confidence")) issue.setAiConfidence(aiResult.get("confidence").asInt());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gemini AI failed, using fallback categorization: " + e.getMessage());
+        }
+        
+        if (issue.getSeverity() == null) issue.setSeverity("medium");
+        if (issue.getAiConfidence() == null) issue.setAiConfidence(85); // fallback confidence
         
         Issue saved = issueRepository.save(issue);
         return ResponseEntity.ok(saved);
@@ -52,15 +88,30 @@ public class IssueController {
 
     // POST /api/issues/{id}/verify — verify issue
     @PostMapping("/issues/{id}/verify")
-    public ResponseEntity<Map<String, Object>> verifyIssue(
-            @PathVariable String id,
+    public ResponseEntity<Issue> verifyIssue(
+            @PathVariable UUID id,
             @RequestBody Map<String, Object> body) {
-        return ResponseEntity.ok(Map.of(
-            "issueId", id,
-            "action", body.getOrDefault("action", "confirm"),
-            "newTrustScore", 75,
-            "message", "Verification recorded"
-        ));
+        
+        Optional<Issue> optIssue = issueRepository.findById(id);
+        if (optIssue.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Issue issue = optIssue.get();
+        String action = (String) body.getOrDefault("action", "upvote");
+        
+        if ("upvote".equals(action)) {
+            issue.setUpvotes(issue.getUpvotes() + 1);
+            if (issue.getUpvotes() > 5) {
+                issue.setStatus("verified");
+            }
+        } else if ("downvote".equals(action)) {
+            // we don't have a downvotes field in the entity currently, so we just decrease upvotes or track it
+            issue.setUpvotes(Math.max(0, issue.getUpvotes() - 1));
+        }
+        
+        Issue saved = issueRepository.save(issue);
+        return ResponseEntity.ok(saved);
     }
 
     // GET /api/issues/{id}/status — get issue status

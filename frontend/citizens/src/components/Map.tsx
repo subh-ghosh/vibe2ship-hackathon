@@ -490,7 +490,16 @@ export default function MapView() {
         };
 
         return (
-          <Marker key={issue.id} longitude={issue.lng} latitude={issue.lat} anchor="center">
+          <Marker key={issue.id} longitude={issue.lng} latitude={issue.lat} anchor="center" 
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              useMapStore.getState().setActiveIssue(issue);
+              useMapStore.getState().setMode('issue');
+              useMapStore.getState().setSheetSnap('half');
+              setCenter({ lat: issue.lat, lng: issue.lng });
+            }}
+            style={{ zIndex: useMapStore.getState().activeIssue?.id === issue.id ? 50 : 10 }}
+          >
             <div
               title={issue.description}
               style={{

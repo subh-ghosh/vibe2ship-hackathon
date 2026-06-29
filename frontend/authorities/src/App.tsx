@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Activity, AlertTriangle, CheckCircle, Clock, Map as MapIcon, Users, Settings, Bell, Search, LayoutDashboard } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, AlertTriangle, CheckCircle, Clock, Map as MapIcon, Users, Settings, Bell, Search, LayoutDashboard, X, Bot, Sparkles, Navigation } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const mockChartData = [
@@ -13,17 +13,19 @@ const mockChartData = [
 ];
 
 const issuesFeed = [
-  { id: 'ISS-001', type: 'Flooding', severity: 'Critical', location: 'Koramangala, Bangalore', time: '10 mins ago', status: 'Unassigned', aiConfidence: 98 },
-  { id: 'ISS-002', type: 'Pothole', severity: 'High', location: 'Indiranagar 100ft Rd', time: '25 mins ago', status: 'Assigned', aiConfidence: 92 },
-  { id: 'ISS-003', type: 'Broken Light', severity: 'Medium', location: 'HSR Layout Sec 4', time: '1 hr ago', status: 'Assigned', aiConfidence: 85 },
-  { id: 'ISS-004', type: 'Garbage', severity: 'Low', location: 'Whitefield', time: '2 hrs ago', status: 'Resolved', aiConfidence: 99 },
+  { id: 'ISS-001', type: 'Flooding', severity: 'Critical', location: 'Koramangala, Bangalore', time: '10 mins ago', status: 'Unassigned', aiConfidence: 98, desc: "Severe waterlogging up to 2 feet on 80ft road after rains." },
+  { id: 'ISS-002', type: 'Pothole', severity: 'High', location: 'Indiranagar 100ft Rd', time: '25 mins ago', status: 'Assigned', aiConfidence: 92, desc: "Deep pothole causing traffic jam near Metro station." },
+  { id: 'ISS-003', type: 'Broken Light', severity: 'Medium', location: 'HSR Layout Sec 4', time: '1 hr ago', status: 'Assigned', aiConfidence: 85, desc: "Streetlight flickering and completely out at night." },
+  { id: 'ISS-004', type: 'Garbage', severity: 'Low', location: 'Whitefield', time: '2 hrs ago', status: 'Resolved', aiConfidence: 99, desc: "Dumpster overflowing onto the sidewalk." },
 ];
 
 export default function App() {
+  const [selectedIssue, setSelectedIssue] = useState<typeof issuesFeed[0] | null>(null);
+
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0D1117] text-[#C9D1D9]">
+    <div className="flex h-screen overflow-hidden bg-[#0D1117] text-[#C9D1D9] relative">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-[#30363D] bg-[#161B22] flex flex-col">
+      <aside className="w-64 border-r border-[#30363D] bg-[#161B22] flex flex-col z-20">
         <div className="h-16 flex items-center px-6 border-b border-[#30363D]">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             CivicOS <span className="text-sm font-medium text-slate-400">Command</span>
@@ -49,17 +51,10 @@ export default function App() {
             <span className="font-medium">Field Teams</span>
           </a>
         </nav>
-        
-        <div className="p-4 border-t border-[#30363D]">
-          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#21262D]/50 transition-colors text-slate-300">
-            <Settings size={20} />
-            <span className="font-medium">Settings</span>
-          </a>
-        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header */}
         <header className="h-16 flex items-center justify-between px-8 border-b border-[#30363D] bg-[#161B22]/50 backdrop-blur-sm z-10">
           <div className="relative w-96">
@@ -70,7 +65,6 @@ export default function App() {
               className="w-full bg-[#0D1117] border border-[#30363D] rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-500"
             />
           </div>
-          
           <div className="flex items-center gap-4">
             <button className="relative p-2 text-slate-300 hover:text-white transition-colors">
               <Bell size={20} />
@@ -109,7 +103,6 @@ export default function App() {
                 <span>↑ 12%</span> <span className="text-slate-500">vs last week</span>
               </div>
             </div>
-            
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium">Critical Issues</h3>
@@ -122,7 +115,6 @@ export default function App() {
                 <span>↑ 4%</span> <span className="text-slate-500">vs last week</span>
               </div>
             </div>
-            
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium">Resolution Rate</h3>
@@ -135,7 +127,6 @@ export default function App() {
                 <span>↑ 2.4%</span> <span className="text-slate-500">vs last week</span>
               </div>
             </div>
-            
             <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-400 font-medium">Avg. Response</h3>
@@ -182,7 +173,7 @@ export default function App() {
             </div>
 
             {/* Live Feed */}
-            <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 flex flex-col">
+            <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 flex flex-col relative z-0">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-white">Live AI Intel Feed</h3>
                 <span className="flex h-3 w-3 relative">
@@ -193,7 +184,11 @@ export default function App() {
               
               <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                 {issuesFeed.map((issue) => (
-                  <div key={issue.id} className="p-4 border border-[#30363D] rounded-lg bg-[#0D1117] hover:border-blue-500/50 transition-colors cursor-pointer group">
+                  <div 
+                    key={issue.id} 
+                    onClick={() => setSelectedIssue(issue)}
+                    className="p-4 border border-[#30363D] rounded-lg bg-[#0D1117] hover:border-blue-500/50 transition-colors cursor-pointer group"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
@@ -207,7 +202,7 @@ export default function App() {
                         <span className="text-xs text-slate-400">{issue.time}</span>
                       </div>
                       <span className="text-xs font-mono text-emerald-400 flex items-center gap-1">
-                        ✨ AI Conf: {issue.aiConfidence}%
+                        ✨ {issue.aiConfidence}%
                       </span>
                     </div>
                     
@@ -229,7 +224,7 @@ export default function App() {
                         {issue.status}
                       </span>
                       {issue.status === 'Unassigned' && (
-                        <button className="text-xs font-medium text-blue-400 hover:text-blue-300">Assign Team</button>
+                        <button className="text-xs font-medium text-blue-400 hover:text-blue-300">View Details</button>
                       )}
                     </div>
                   </div>
@@ -238,7 +233,94 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* AI Resolution Modal Overlay */}
+        {selectedIssue && (
+          <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-8">
+            <div className="bg-[#161B22] border border-[#30363D] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-[#30363D] flex justify-between items-start bg-[#0D1117]">
+                <div>
+                  <div className="flex gap-2 items-center mb-2">
+                    <span className="text-xs text-slate-400 font-mono">{selectedIssue.id}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                      selectedIssue.severity === 'Critical' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'
+                    }`}>
+                      {selectedIssue.severity}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">{selectedIssue.type}</h2>
+                  <div className="flex gap-2 mt-1 text-sm text-slate-400">
+                    <MapPin size={16} /> {selectedIssue.location}
+                  </div>
+                </div>
+                <button onClick={() => setSelectedIssue(null)} className="p-2 rounded-lg hover:bg-[#21262D] text-slate-400 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6 bg-gradient-to-b from-[#161B22] to-[#0D1117] flex-1 overflow-y-auto">
+                <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded-xl mb-6">
+                  <p className="text-slate-300">"{selectedIssue.desc}"</p>
+                </div>
+
+                <div className="border border-blue-500/30 bg-blue-500/5 rounded-xl p-5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full"></div>
+                  
+                  <h3 className="text-lg font-semibold text-blue-400 flex items-center gap-2 mb-4">
+                    <Sparkles size={20} />
+                    Gemini AI Resolution Plan
+                  </h3>
+                  
+                  <div className="space-y-4 relative z-10">
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Impact Analysis</div>
+                      <p className="text-sm text-slate-300">This issue affects a major arterial road. High risk of traffic congestion during peak hours (17:00 - 20:00). Estimated 15,000 vehicles impacted.</p>
+                    </div>
+                    
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Recommended Action</div>
+                      <ul className="text-sm text-slate-300 list-disc list-inside space-y-1">
+                        <li>Dispatch Emergency Response Team Alpha</li>
+                        <li>Requires 1 asphalt patch truck and 3 crew members</li>
+                        <li>Estimated time to repair: 45 minutes</li>
+                      </ul>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                      <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
+                        <div className="text-xs text-slate-500 mb-1">Estimated Cost</div>
+                        <div className="font-mono text-emerald-400 font-bold">₹ 14,500</div>
+                      </div>
+                      <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D]">
+                        <div className="text-xs text-slate-500 mb-1">Priority Rank</div>
+                        <div className="font-mono text-red-400 font-bold">#2 in Ward</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-[#30363D] bg-[#0D1117] flex justify-end gap-3">
+                <button 
+                  onClick={() => setSelectedIssue(null)}
+                  className="px-4 py-2 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-[#21262D] transition-colors"
+                >
+                  Dismiss
+                </button>
+                <button className="px-4 py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2">
+                  <Navigation size={18} />
+                  Dispatch Team
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
+}
+
+// Quick inline component for MapPin since it was missing from lucide-react imports initially
+function MapPin(props: any) {
+  return <MapIcon {...props} />;
 }
