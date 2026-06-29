@@ -106,6 +106,25 @@ public class IssueController {
         return ResponseEntity.ok(saved);
     }
 
+    // PATCH /api/issues/{id}/status — authority updates status
+    @PatchMapping("/issues/{id}/status")
+    public ResponseEntity<Issue> updateIssueStatus(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body) {
+        
+        Optional<Issue> optIssue = issueRepository.findById(id);
+        if (optIssue.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Issue issue = optIssue.get();
+        String newStatus = body.getOrDefault("status", issue.getStatus());
+        issue.setStatus(newStatus);
+        
+        Issue saved = issueRepository.save(issue);
+        return ResponseEntity.ok(saved);
+    }
+
     // POST /api/issues/{id}/verify — verify issue
     @PostMapping("/issues/{id}/verify")
     public ResponseEntity<Issue> verifyIssue(

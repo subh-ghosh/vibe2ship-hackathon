@@ -350,9 +350,49 @@ export default function App() {
                 >
                   Dismiss
                 </button>
-                <button className="px-4 py-2 rounded-lg font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-2">
-                  <Navigation size={18} />
-                  Dispatch Team
+                <button 
+                  onClick={async () => {
+                    try {
+                      await fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'resolved' })
+                      });
+                      setSelectedIssue({ ...selectedIssue, status: 'Resolved' });
+                      setTimeout(() => setSelectedIssue(null), 1500);
+                    } catch(e) { console.error(e); }
+                  }}
+                  className="px-4 py-2 rounded-lg font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-2"
+                >
+                  <CheckCircle size={18} />
+                  Mark Resolved
+                </button>
+                <button 
+                  onClick={async () => {
+                    try {
+                      await fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'dispatched' })
+                      });
+                      setSelectedIssue({ ...selectedIssue, status: 'Dispatched' });
+                      setTimeout(() => setSelectedIssue(null), 1500);
+                    } catch(e) { console.error(e); }
+                  }}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    selectedIssue.status === 'Dispatched' || selectedIssue.status === 'Resolved'
+                      ? 'bg-emerald-600 text-white cursor-default' 
+                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+                  disabled={selectedIssue.status === 'Dispatched' || selectedIssue.status === 'Resolved'}
+                >
+                  {selectedIssue.status === 'Dispatched' ? (
+                    <><CheckCircle size={18} /> Team Dispatched</>
+                  ) : selectedIssue.status === 'Resolved' ? (
+                    <><CheckCircle size={18} /> Resolved ✓</>
+                  ) : (
+                    <><Navigation size={18} /> Dispatch Team</>
+                  )}
                 </button>
               </div>
             </div>
