@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Activity, AlertTriangle, CheckCircle, Clock, Map as MapIcon, Users, Settings, Bell, Search, LayoutDashboard, X, Bot, Sparkles, Navigation } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import Map, { Marker } from 'react-map-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function App() {
   const [selectedIssue, setSelectedIssue] = useState<any>(null);
@@ -179,34 +180,34 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-            {/* Chart */}
-            <div className="col-span-2 bg-[#161B22] border border-[#30363D] rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-6">Incident Resolution Trend</h3>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#30363D" vertical={false} />
-                    <XAxis dataKey="name" stroke="#8b949e" tick={{fill: '#8b949e', fontSize: 12}} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#8b949e" tick={{fill: '#8b949e', fontSize: 12}} axisLine={false} tickLine={false} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#161B22', borderColor: '#30363D', borderRadius: '8px', color: '#fff' }}
-                      itemStyle={{ color: '#e5e7eb' }}
-                    />
-                    <Area type="monotone" dataKey="reports" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorReports)" name="New Reports" />
-                    <Area type="monotone" dataKey="resolved" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorResolved)" name="Resolved" />
-                  </AreaChart>
-                </ResponsiveContainer>
+            {/* Live Map */}
+            <div className="col-span-2 bg-[#161B22] border border-[#30363D] rounded-xl p-0 relative overflow-hidden h-[450px]">
+              <div className="absolute top-4 left-4 z-10 bg-[#0D1117]/80 backdrop-blur border border-[#30363D] px-4 py-2 rounded-lg">
+                <h3 className="text-sm font-bold text-white">Live Infrastructure Map</h3>
               </div>
+              <Map
+                initialViewState={{
+                  longitude: 77.5946,
+                  latitude: 12.9716,
+                  zoom: 11
+                }}
+                mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+              >
+                {issuesFeed.map((issue) => {
+                  const [lat, lng] = issue.location.split(', ').map(Number);
+                  return (
+                    <Marker key={issue.id} longitude={lng} latitude={lat} anchor="center" onClick={(e) => { e.originalEvent.stopPropagation(); setSelectedIssue(issue); }}>
+                      <div className={`w-4 h-4 rounded-full border-2 border-white shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer ${
+                        issue.severity === 'Critical' ? 'bg-red-500' :
+                        issue.severity === 'High' ? 'bg-orange-500' :
+                        issue.severity === 'Medium' ? 'bg-yellow-500' : 'bg-blue-500'
+                      }`}>
+                        <div className="absolute inset-0 rounded-full animate-ping opacity-50 bg-inherit" />
+                      </div>
+                    </Marker>
+                  );
+                })}
+              </Map>
             </div>
 
             {/* Live Feed */}
