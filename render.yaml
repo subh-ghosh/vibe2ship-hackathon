@@ -7,12 +7,12 @@ services:
     plan: free
     envVars:
       - key: DATABASE_URL
-        value: jdbc:postgresql://ep-aged-water-aope8tgl.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+        value: "jdbc:postgresql://<NEON_HOST>/neondb?sslmode=require"
       - key: DATABASE_USERNAME
-        value: neondb_owner
+        value: "neondb_owner"
       - key: DATABASE_PASSWORD
-        value: npg_ayjS1Fmrx4uU
+        value: "<YOUR_NEON_PASSWORD>"
       - key: GEMINI_API_KEY
-        value: AQ.Ab8RN6IY59MO7ZY6eTSSIY3TW3N9LzGyvMx7H4itF6ol_OOUFw
+        value: "<YOUR_GEMINI_API_KEY>"
       - key: JAVA_TOOL_OPTIONS
         value: "-Xmx400m"

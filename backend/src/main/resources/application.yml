@@ -3,7 +3,7 @@ spring:
     name: civicos-backend
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/civicos}
+    url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME:civicos}
     password: ${DATABASE_PASSWORD:civicos_secret}
     driver-class-name: org.postgresql.Driver
@@ -39,7 +39,7 @@ civicos:
   cors:
     allowed-origins: "*"
   gemini:
-    api-key: ${GEMINI_API_KEY:AQ.Ab8RN6IY59MO7ZY6eTSSIY3TW3N9LzGyvMx7H4itF6ol_OOUFw}
+    api-key: ${GEMINI_API_KEY}
     model: gemini-2.5-flash
 
 logging:
