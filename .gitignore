@@ -14,3 +14,4 @@ frontend/authorities/dist/
 # IDE
 .idea/
 *.iml
+backend/target/
