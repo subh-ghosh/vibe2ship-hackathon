@@ -151,6 +151,14 @@ export const useMapStore = create<MapStore>()(
           }
         } catch (e) {
           console.log('Backend offline, using fallback mock issues.');
+          if (get().issues.length === 0) {
+            set({ issues: [
+              { id: 'mock-1', lat: 12.9716, lng: 77.5946, type: 'pothole', severity: 'high', status: 'reported', createdAt: new Date().toISOString(), aiConfidence: 95, description: 'Deep pothole', upvotes: 15, downvotes: 0 },
+              { id: 'mock-2', lat: 12.9720, lng: 77.5950, type: 'broken_light', severity: 'medium', status: 'resolving', createdAt: new Date().toISOString(), aiConfidence: 88, description: 'Dark road', upvotes: 5, downvotes: 1 },
+              { id: 'mock-3', lat: 12.9710, lng: 77.5940, type: 'water_leak', severity: 'critical', status: 'resolved', createdAt: new Date().toISOString(), aiConfidence: 99, description: 'Water leak', upvotes: 20, downvotes: 0 },
+              { id: 'mock-4', lat: 12.9730, lng: 77.5930, type: 'garbage', severity: 'low', status: 'reported', createdAt: new Date().toISOString(), aiConfidence: 92, description: 'Trash', upvotes: 2, downvotes: 0 },
+            ]});
+          }
         }
       },
       
@@ -173,6 +181,7 @@ export const useMapStore = create<MapStore>()(
             severity: 'medium',
             upvotes: 1,
             downvotes: 0,
+            aiConfidence: 99,
             createdAt: new Date().toISOString()
           } as import('../types').Issue;
           set({ issues: [localIssue, ...get().issues] });

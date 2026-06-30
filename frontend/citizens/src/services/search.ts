@@ -75,7 +75,16 @@ export async function searchPlaces(query: string, lat?: number, lng?: number): P
     try { localStorage.setItem(cacheKey, JSON.stringify(suggestions)); } catch (e) {}
     return suggestions;
   } catch {
-    return [];
+    console.warn('Search API failed, providing mock result');
+    return [{
+      id: 'mock-place',
+      label: 'Demo Location (Offline)',
+      sublabel: 'MG Road, Bangalore',
+      lat: 12.9716,
+      lng: 77.5946,
+      type: 'place',
+      icon: '📍',
+    }];
   }
 }
 

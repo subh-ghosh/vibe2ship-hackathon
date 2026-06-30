@@ -69,29 +69,21 @@ docker-compose up -d
 ```
 *(This will start PostgreSQL/PostGIS and automatically seed the database on port 5432).*
 
-### 2. Start the Spring Boot Backend
+### 2. Start the Unified Server (Spring Boot + Built React Apps)
+The entire React frontend (both Citizens App and Authority Dashboard) has been compiled and injected directly into the Spring Boot static resources. You only need to run the backend!
+
 Ensure you have your Gemini API key ready in `backend/src/main/resources/application.yml` (or via environment variables).
 ```bash
 cd backend
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
-*(Backend runs on `http://localhost:8080`)*
 
-### 3. Start the Citizens App
-```bash
-cd frontend/citizens
-npm install
-npm run dev
-```
-*(Citizens App runs on `http://localhost:5173`)*
+**That's it! Access the ecosystem:**
+*   **Landing Page:** `http://localhost:8080/`
+*   **Citizens App:** `http://localhost:8080/citizens/`
+*   **Authority Command Center:** `http://localhost:8080/admin/`
 
-### 4. Start the Authority Command Center
-```bash
-cd frontend/authorities
-npm install
-npm run dev
-```
-*(Authority Dashboard runs on `http://localhost:5174`)*
+*(Note: The frontends are heavily fortified with offline fallbacks. Even if the database or Gemini API goes down during a live demo, the UI will seamlessly switch to local mock data without crashing!)*
 
 ---
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe2Ship Hackathon Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            color: #8b949e;
+            max-width: 600px;
+        }
+        .container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 300px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #58a6ff;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #58a6ff;
+            margin-bottom: 1rem;
+        }
+        .card-desc {
+            font-size: 1rem;
+            color: #c9d1d9;
+        }
+        .badge {
+            background-color: #58a6ff20;
+            color: #58a6ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Community Intelligence Platform</h1>
+    <p>A high-fidelity, AI-powered municipal ecosystem demonstrating real-time civic issue reporting and automated authority dispatch.</p>
+    
+    <div class="container">
+        <a href="/citizens/" class="card">
+            <div class="badge">Google Maps Interface</div>
+            <div class="card-title">Citizen App</div>
+            <div class="card-desc">Report issues dynamically on a mobile-first, high-fidelity Google Maps replica with live dispatch updates.</div>
+        </a>
+        
+        <a href="/admin/" class="card">
+            <div class="badge">Dashboard Interface</div>
+            <div class="card-title">Authority Command Center</div>
+            <div class="card-desc">Analyze reports using Gemini AI and manage city infrastructure through a real-time command dashboard.</div>
+        </a>
+    </div>
+</body>
+</html>

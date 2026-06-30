@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: civicos-backend
+    runtime: java
+    buildCommand: cd backend && ./mvnw clean package -DskipTests
+    startCommand: java -jar backend/target/civicos-backend-0.0.1-SNAPSHOT.jar
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: jdbc:postgresql://ep-aged-water-aope8tgl.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      - key: DATABASE_USERNAME
+        value: neondb_owner
+      - key: DATABASE_PASSWORD
+        value: npg_ayjS1Fmrx4uU
+      - key: GEMINI_API_KEY
+        value: AQ.Ab8RN6IY59MO7ZY6eTSSIY3TW3N9LzGyvMx7H4itF6ol_OOUFw
+      - key: JAVA_TOOL_OPTIONS
+        value: "-Xmx400m"

@@ -115,9 +115,13 @@ export default function MapView() {
           loadDynamicPlaces(lat, lng);
         },
         (err) => {
-          alert(err.code === 1
-            ? 'Location denied. Click the 🔒 in the URL bar → Allow Location.'
-            : `Location error: ${err.message}`);
+          console.warn('Geolocation failed, falling back to Bangalore demo coordinates', err);
+          alert('Location unavailable. Simulating location in Bangalore center for demo.');
+          const fallbackLat = 12.9716;
+          const fallbackLng = 77.5946;
+          setUserLocation({ lat: fallbackLat, lng: fallbackLng });
+          mapRef.current?.flyTo({ center: [fallbackLng, fallbackLat], zoom: 16, duration: 800 });
+          loadDynamicPlaces(fallbackLat, fallbackLng);
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
       );

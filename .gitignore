@@ -1,2 +1,16 @@
-# Local Netlify folder
-.netlify
+# Build outputs
+dist/
+backend/src/main/resources/static/
+backend/target/
+node_modules/
+frontend/citizens/node_modules/
+frontend/authorities/node_modules/
+frontend/citizens/dist/
+frontend/authorities/dist/
+
+# Firebase
+.firebase/
+
+# IDE
+.idea/
+*.iml

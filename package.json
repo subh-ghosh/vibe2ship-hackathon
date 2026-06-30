@@ -1,0 +1,7 @@
+{
+  "name": "vibe2ship-hackathon",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend/authorities && npm install && npm run build && cd ../citizens && npm install && npm run build && cd ../.. && rm -rf dist && mkdir -p dist/citizens && mkdir -p dist/admin && cp index.html dist/ && cp -r frontend/citizens/dist/* dist/citizens/ && cp -r frontend/authorities/dist/* dist/admin/ && rm -rf backend/src/main/resources/static && cp -r dist backend/src/main/resources/static"
+  }
+}
