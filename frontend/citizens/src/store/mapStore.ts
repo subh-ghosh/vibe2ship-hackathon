@@ -143,7 +143,8 @@ export const useMapStore = create<MapStore>()(
       
       fetchIssues: async () => {
         try {
-          const res = await fetch('http://localhost:8080/api/issues?size=10000');
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+          const res = await fetch(`${API_URL}/api/issues?size=10000`);
           const data = await res.json();
           if (data && data.content && data.content.length > 0) {
             set({ issues: data.content });
@@ -155,7 +156,8 @@ export const useMapStore = create<MapStore>()(
       
       createIssue: async (issueParams) => {
         try {
-          const res = await fetch('http://localhost:8080/api/issues', {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+          const res = await fetch(`${API_URL}/api/issues`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(issueParams)

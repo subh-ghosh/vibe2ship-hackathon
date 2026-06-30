@@ -31,7 +31,8 @@ export default function App() {
   useEffect(() => {
     const fetchLiveIssues = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/issues?size=20');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_URL}/api/issues?size=20`);
         const data = await res.json();
         if (data && data.content) {
           // Format for dashboard
@@ -55,7 +56,8 @@ export default function App() {
 
     const fetchDashboardStats = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/dashboard');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_URL}/api/dashboard`);
         const data = await res.json();
         if (data) {
           setDashboardStats({
@@ -84,7 +86,8 @@ export default function App() {
     if (!selectedIssue?.rawId) { setAiPlan(null); return; }
     setAiLoading(true);
     setAiPlan(null);
-    fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/ai-plan`, { method: 'POST' })
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    fetch(`${API_URL}/api/issues/${selectedIssue.rawId}/ai-plan`, { method: 'POST' })
       .then(res => res.json())
       .then(data => { if (data?.plan) setAiPlan(data.plan); })
       .catch(() => setAiPlan('IMPACT: Unable to reach AI service. Using fallback analysis.\nACTION_1: Dispatch nearest field team\nACTION_2: Assess on-site and report back\nACTION_3: Complete repair\nCOST: ₹ 10,000 - ₹ 20,000\nTIME: 2-3 hours\nPRIORITY: Standard'))
@@ -417,7 +420,8 @@ export default function App() {
                 <button 
                   onClick={async () => {
                     try {
-                      await fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/status`, {
+                      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+                      await fetch(`${API_URL}/api/issues/${selectedIssue.rawId}/status`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'resolved' })
@@ -434,7 +438,8 @@ export default function App() {
                 <button 
                   onClick={async () => {
                     try {
-                      await fetch(`http://localhost:8080/api/issues/${selectedIssue.rawId}/status`, {
+                      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+                      await fetch(`${API_URL}/api/issues/${selectedIssue.rawId}/status`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'dispatched' })

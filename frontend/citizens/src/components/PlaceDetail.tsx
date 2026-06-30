@@ -14,7 +14,7 @@ function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 
 export default function PlaceDetail() {
   const dragScrollProps = useDraggableScroll<HTMLDivElement>();
-  const { selectedPlace, setMode, setSheetSnap, mode, userLocation } = useMapStore();
+  const { selectedPlace, setSelectedPlace, setMode, setSheetSnap, mode, userLocation } = useMapStore();
 
   const [details, setDetails] = useState<any>(null);
   const [extract, setExtract] = useState<string | null>(null);

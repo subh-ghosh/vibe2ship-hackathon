@@ -8,7 +8,8 @@ export default function IssueDetailSheet() {
 
   const handleVerify = async (action: 'upvote' | 'downvote') => {
     try {
-      await fetch(`http://localhost:8080/api/issues/${activeIssue.id}/verify`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      await fetch(`${API_URL}/api/issues/${activeIssue.id}/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })

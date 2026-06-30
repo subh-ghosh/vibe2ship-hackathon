@@ -18,7 +18,8 @@ export default function NotificationToast() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/issues?size=50');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_URL}/api/issues?size=50`);
         const data = await res.json();
         if (!data?.content) return;
 
@@ -70,7 +71,8 @@ export default function NotificationToast() {
     // Seed the initial statuses on first load
     (async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/issues?size=50');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_URL}/api/issues?size=50`);
         const data = await res.json();
         if (data?.content) {
           for (const issue of data.content) {
